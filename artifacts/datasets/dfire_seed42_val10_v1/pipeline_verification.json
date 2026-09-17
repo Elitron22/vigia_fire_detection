@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "prepared_images": 21527,
+  "splits": {
+    "train": 15500,
+    "val": 1721,
+    "test": 4306
+  },
+  "staged_images": 21527,
+  "staged_label_files": 21527,
+  "staged_boxes": {
+    "smoke": 11854,
+    "fire": 14685
+  },
+  "jpeg_eoi_repaired_in_staging": 37,
+  "original_dataset_modified": false,
+  "notebooks": {
+    "01_DFire_preparacion_dataset.ipynb": {
+      "cells": 20,
+      "executed_code_cells": 10
+    },
+    "02_DFire_entrenamiento_modelos.ipynb": {
+      "cells": 14,
+      "executed_code_cells": 5
+    },
+    "03_DFire_evaluacion_modelos.ipynb": {
+      "cells": 15,
+      "executed_code_cells": 0
+    },
+    "04_DFire_auditoria_escenas.ipynb": {
+      "cells": 21,
+      "executed_code_cells": 9
+    },
+    "05_DFire_barrido_umbrales.ipynb": {
+      "cells": 43,
+      "executed_code_cells": 18
+    }
+  }
+}

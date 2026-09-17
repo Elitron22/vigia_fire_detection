@@ -1,0 +1,33 @@
+{
+  "official_partitions": [
+    "train",
+    "test"
+  ],
+  "validation_source": "official_train",
+  "validation_fraction_requested": 0.1,
+  "seed": 42,
+  "stratification": "image_category",
+  "exact_duplicate_grouping": "sha256",
+  "near_duplicate_audit": "see_notebook_04",
+  "repair_out_of_bounds_boxes": true,
+  "repaired_boxes": 379,
+  "repaired_label_files": 322,
+  "drop_degenerate_boxes": true,
+  "dropped_degenerate_boxes": 18,
+  "dropped_label_files": 18,
+  "jpeg_missing_eoi": 37,
+  "jpeg_missing_eoi_handling": "staging_copy_with_eoi_marker",
+  "original_dataset_modified": false,
+  "dataset_view_root": null,
+  "images": {
+    "train": 15500,
+    "val": 1721,
+    "test": 4306
+  },
+  "dataset_version": "dfire_seed42_val10_v1",
+  "manifest_sha256": "97442af38322abe1bf5178bd6b92c30971d9f354eca3197762bb7a4a4b8c8eb6",
+  "prepared_root": "/workspace/TFM/artifacts/datasets/dfire_seed42_val10_v1",
+  "portable_runtime_yaml_required_after_move": true,
+  "storage_mode": "compact_manifest_plus_repairs",
+  "requires_corrected_staging_for_training_and_new_evaluation": true
+}

@@ -1,0 +1,39 @@
+schema_version: 1
+dataset_version: dfire_seed42_val10_v1
+split: val
+
+training_variants:
+  train640:
+    experiment_id: legacy_yolov8s_baseline
+    trained_imgsz: 640
+    label: Entrenado a 640
+  train768:
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    trained_imgsz: 768
+    label: Entrenado a 768
+  train1024:
+    experiment_id: yolov8s_dfire_seed42_20260912T000125Z
+    trained_imgsz: 1024
+    label: Entrenado a 1024
+
+evaluation_sizes: [640, 768, 1024]
+comparison_baseline: train640
+focus_variant: train768
+focus_evaluation_size: 640
+prediction_confidence: 0.01
+thresholds: [0.01, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.99]
+reference_threshold: 0.25
+match_iou: 0.50
+nms_iou: 0.70
+selection_objective: macro_recall
+alarm_budgets: [0.02]
+review_budget: 0.02
+size_area_boundaries: [0.01, 0.10]
+
+standard_val_batch: 8
+prediction_chunk_size: 2
+ram_limit_gib: 10.0
+staging_workers: 4
+seed: 42
+gallery_pairs: 6
+bootstrap_iterations: 5000

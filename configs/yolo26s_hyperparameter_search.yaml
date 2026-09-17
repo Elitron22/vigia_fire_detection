@@ -1,0 +1,113 @@
+schema_version: 2
+search_id: yolo26s_multifidelity_hp_v2
+dataset_version: dfire_seed42_val10_v1
+model_key: yolo26s
+baseline_experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+
+# El baseline necesitó 14.952 s para 89 épocas: unas 2,8 min/época. Cuatro
+# cribados de 50 épocas requieren alrededor de 9,3 h en la misma RTX 5070.
+night_budget_hours: 10.0
+screening_epochs: 50
+expected_hours_per_screening_run: 2.35
+active_trials:
+  - hp01_lr5e4
+  - hp02_weight_decay1e3
+  - hp03_conservative_aug
+  - hp04_lr5e4_conservative_aug
+
+screening_parameters:
+  imgsz: 768
+  epochs: 50
+  batch: 16
+  # Evita que la parada temprana introduzca distinta fidelidad entre ensayos.
+  patience: 50
+  optimizer: AdamW
+  lr0: 0.001
+  cos_lr: true
+  amp: true
+  deterministic: true
+  save_period: 10
+  cache: false
+
+final_parameters:
+  imgsz: 768
+  epochs: 100
+  batch: 16
+  patience: 20
+  optimizer: AdamW
+  lr0: 0.001
+  cos_lr: true
+  amp: true
+  deterministic: true
+  save_period: 10
+  cache: false
+
+trials:
+  hp01_lr5e4:
+    experiment_id: yolo26s_hp01_lr5e4_50ep_seed42
+    seed: 42
+    rationale: Reducir lr0 manteniendo los aumentos y la regularización de referencia.
+    overrides:
+      lr0: 0.0005
+
+  hp02_weight_decay1e3:
+    experiment_id: yolo26s_hp02_weight_decay1e3_50ep_seed42
+    seed: 42
+    rationale: Duplicar weight decay para comprobar si reduce el sobreajuste y mejora la precisión.
+    overrides:
+      weight_decay: 0.001
+
+  hp03_conservative_aug:
+    experiment_id: yolo26s_hp03_conservative_aug_50ep_seed42
+    seed: 42
+    rationale: Reducir transformaciones de color y geometría potencialmente poco realistas.
+    overrides:
+      hsv_h: 0.010
+      hsv_s: 0.45
+      hsv_v: 0.30
+      translate: 0.05
+      scale: 0.25
+      mosaic: 0.70
+      close_mosaic: 15
+
+  hp04_lr5e4_conservative_aug:
+    experiment_id: yolo26s_hp04_lr5e4_conservative_aug_50ep_seed42
+    seed: 42
+    rationale: Comprobar la interacción entre lr0 conservador y aumentos moderados.
+    overrides:
+      lr0: 0.0005
+      hsv_h: 0.010
+      hsv_s: 0.45
+      hsv_v: 0.30
+      translate: 0.05
+      scale: 0.25
+      mosaic: 0.70
+      close_mosaic: 15
+
+selection:
+  split: val
+  screening_horizon_epochs: 50
+  primary_metric: metrics/mAP50-95(B)
+  supporting_metrics:
+    - metrics/precision(B)
+    - metrics/recall(B)
+    - metrics/mAP50(B)
+  final_operational_check: Barrido de umbrales por clase con límite del 2 % de imágenes negativas con alarma.
+  test_locked: true
+
+evaluation:
+  candidate_count: 2
+  split: val
+  prediction_confidence: 0.01
+  match_iou: 0.50
+  nms_iou: 0.70
+  imgsz: 768
+  chunk_size: 2
+  ram_limit_gib: 10.0
+  seed: 42
+  alarm_budget: 0.02
+  size_area_boundaries: [0.01, 0.10]
+  # La malla incluye el mínimo de inferencia y cubre los puntos útiles
+  # observados para YOLO26s. El cálculo por clase reutiliza cada umbral.
+  smoke_thresholds: [0.01, 0.05, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.45, 0.50]
+  fire_thresholds: [0.01, 0.05, 0.10, 0.12, 0.14, 0.16, 0.17, 0.18, 0.20, 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40, 0.45, 0.50]

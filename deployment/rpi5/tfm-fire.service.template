@@ -1,0 +1,31 @@
+[Unit]
+Description=TFM detector de humo y fuego
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__TFM_USER__
+WorkingDirectory=__TFM_ROOT__
+Environment=TFM_PROJECT_ROOT=__TFM_ROOT__
+Environment=TFM_APP_CONFIG=__TFM_ROOT__/configs/app.rpi5.yaml
+Environment=TFM_APP_MODEL_PATH=__TFM_ROOT__/model/yolo26s_768_final.pt
+Environment=TFM_APP_MODEL_ID=yolo26s_final_rpi5
+Environment=TFM_APP_MODEL_KEY=yolo26s
+Environment=TFM_APP_TRAINED_IMGSZ=768
+Environment=TFM_APP_MODEL_SHA256=bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67
+Environment=TFM_APP_DEVICE=cpu
+Environment=TFM_TELEGRAM_MODE=dry_run
+EnvironmentFile=-__TFM_ROOT__/.env.telegram
+Environment=OMP_NUM_THREADS=4
+Environment=OPENBLAS_NUM_THREADS=4
+Environment=MKL_NUM_THREADS=4
+ExecStart=__TFM_ROOT__/.venv-rpi5/bin/python __TFM_ROOT__/tools/run_detection_app.py --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

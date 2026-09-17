@@ -1,0 +1,6 @@
+# Dependencias del runtime ARM64. PyTorch se resuelve como rueda CPU aarch64.
+ultralytics==8.4.132
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1
+PyYAML==6.0.2

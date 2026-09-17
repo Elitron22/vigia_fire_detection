@@ -1,0 +1,46 @@
+schema_version: 1
+dataset_version: dfire_seed42_val10_v1
+split: val
+test_locked: true
+
+model:
+  label: YOLO26s 768→768
+  experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+  weights: artifacts/14_final_model_freeze/final/weights/best.pt
+  weights_sha256: bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67
+  imgsz: 768
+
+validation_cache:
+  summary: artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/evaluation/val/threshold_cache/5050bea962300293/runs/20260912T222044Z_a42813/val_error_summary.json
+  predictions: artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/evaluation/val/threshold_cache/5050bea962300293/runs/20260912T222044Z_a42813/val_predictions.jsonl
+
+operating_point:
+  smoke_threshold: 0.36
+  fire_threshold: 0.16
+  match_iou: 0.50
+
+sample_design:
+  seed: 42
+  cases:
+    - [true_positive, smoke]
+    - [true_positive, fire]
+    - [negative_false_alarm, smoke]
+    - [negative_false_alarm, fire]
+    - [borderline_false_negative, smoke]
+    - [borderline_false_negative, fire]
+
+eigen_cam:
+  feature_layers: [16, 19, 22]
+  aggregation: normalized_mean
+
+occlusion:
+  grid_size: 6
+  fill: gaussian_blur
+  target_assignment: highest_iou_then_confidence
+  inference_confidence: 0.001
+  target_match_iou: 0.30
+  batch: 8
+  deletion_fractions: [0.0, 0.10, 0.25, 0.50, 0.75, 1.0]
+  random_repeats: 5
+
+output_parent: artifacts/16_model_interpretability/validation

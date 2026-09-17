@@ -1,0 +1,80 @@
+schema_version: 1
+benchmark_id: dfire_operational_video_v1
+corpus_manifest: data/operational_videos_v1/manifest.json
+output_parent: artifacts/13_operational_video_benchmark/pilot
+
+# Los fotogramas se muestrean por timestamp para que todos los vídeos aporten la
+# misma frecuencia temporal, independientemente de sus FPS nativos.
+sample_fps: 5.0
+prediction_confidence: 0.01
+nms_iou: 0.70
+device: 0
+seed: 42
+warmup_iterations: 5
+bootstrap_iterations: 2000
+test_locked: true
+
+models:
+  yolo26s_768:
+    label: YOLO26s entrenado e inferido a 768
+    experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+    imgsz: 768
+    color: "#D95F35"
+    profiles:
+      sensitive:
+        label: Sensible
+        smoke_threshold: 0.16
+        fire_threshold: 0.16
+      recall_guardrail:
+        label: Guardrail de recall
+        smoke_threshold: 0.20
+        fire_threshold: 0.17
+      max_f1:
+        label: Máximo F1 en validación
+        smoke_threshold: 0.33
+        fire_threshold: 0.32
+
+  yolov8s_768_eval640:
+    label: YOLOv8s entrenado a 768 e inferido a 640
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    imgsz: 640
+    color: "#275D8C"
+    profiles:
+      original_balanced:
+        label: Equilibrado original
+        smoke_threshold: 0.30
+        fire_threshold: 0.30
+      recall_guardrail:
+        label: Guardrail de recall
+        smoke_threshold: 0.34
+        fire_threshold: 0.31
+      max_f1:
+        label: Máximo F1 en validación
+        smoke_threshold: 0.39
+        fire_threshold: 0.33
+
+temporal_rules:
+  instant:
+    label: Sin filtro temporal (1 de 1)
+    window_frames: 1
+    minimum_hits: 1
+    clear_after_misses: 10
+  two_of_three:
+    label: 2 detecciones de 3
+    window_frames: 3
+    minimum_hits: 2
+    clear_after_misses: 10
+  three_of_five:
+    label: 3 detecciones de 5
+    window_frames: 5
+    minimum_hits: 3
+    clear_after_misses: 10
+
+reporting_roles:
+  - independent_operational
+  - dfire_domain_diagnostic_only
+
+# El corpus actual se considera piloto. No se declara un ganador final mientras
+# no haya negativos independientes y al menos 30 minutos negativos en total.
+minimum_final_negative_minutes: 30.0
+require_independent_negatives_for_final: true

@@ -1,0 +1,35 @@
+schema_version: 1
+
+server:
+  # Variante separada, accesible únicamente mediante túnel SSH.
+  host: 127.0.0.1
+  port: 8002
+  max_upload_mib: 200
+
+inference:
+  default_experiment_id: yolo26s_768_ncnn_rpi5
+  device: cpu
+  imgsz: 768
+  # La inferencia debe conservar candidatos hasta el menor umbral de clase.
+  confidence: 0.165
+  nms_iou: 0.70
+  video_stride: 2
+  allow_runtime_overrides: false
+
+alerts:
+  enabled: true
+  hold_seconds: 3.0
+  clear_seconds: 5.0
+  cooldown_seconds: 60.0
+  maximum_gap_seconds: 0.75
+  minimum_confidence:
+    smoke: 0.415
+    fire: 0.165
+
+telegram:
+  mode: dry_run
+  timeout_seconds: 10.0
+
+storage:
+  output_directory: artifacts/08_detection_app_ncnn
+  event_log: artifacts/08_detection_app_ncnn/events.jsonl

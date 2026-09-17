@@ -1,0 +1,7 @@
+# Runtime ARM64 fijado para la variante NCNN. PyTorch CPU procede de Debian.
+ultralytics==8.4.132
+ncnn==1.0.20260526
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1
+PyYAML==6.0.2

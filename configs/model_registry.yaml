@@ -1,0 +1,71 @@
+schema_version: 1
+
+# Protocolo controlado: se mantiene igual entre arquitecturas para que la
+# comparación mida principalmente el efecto del modelo.
+profiles:
+  controlled:
+    imgsz: 640
+    epochs: 100
+    batch: 16
+    patience: 20
+    optimizer: AdamW
+    lr0: 0.001
+    cos_lr: true
+    amp: true
+    deterministic: true
+    save_period: 10
+    cache: false
+  
+  controlled_1024:
+    imgsz: 1024
+    epochs: 100
+    batch: 16
+    patience: 20
+    optimizer: AdamW
+    lr0: 0.001
+    cos_lr: true
+    amp: true
+    deterministic: true
+    save_period: 10
+    cache: false
+  
+  controlled_768:
+    imgsz: 768
+    epochs: 100
+    batch: 16
+    patience: 20
+    optimizer: AdamW
+    lr0: 0.001
+    cos_lr: true
+    amp: true
+    deterministic: true
+    save_period: 10
+    cache: false
+
+models:
+  yolov8n:
+    family: YOLOv8
+    scale: nano
+    weights: yolov8n.pt
+    purpose: Comparación ligera y futura exportación a Raspberry Pi.
+
+  yolov8s:
+    family: YOLOv8
+    scale: small
+    weights: yolov8s.pt
+    purpose: Baseline actual con mayor capacidad que la variante nano.
+
+  yolo26n:
+    family: YOLO26
+    scale: nano
+    weights: weights/yolo26n.pt
+    purpose: Arquitectura reciente y ligera para comparar precisión y despliegue.
+
+  yolo26s:
+    family: YOLO26
+    scale: small
+    weights: yolo26s.pt
+    purpose: Comparación small con YOLOv8s y estudio del equilibrio precisión-coste.
+
+  # Para añadir otro detector compatible con Ultralytics, copia una entrada,
+  # asigna una clave única e indica un .pt local o un nombre descargable.

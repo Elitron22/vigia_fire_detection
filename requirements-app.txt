@@ -1,0 +1,9 @@
+numpy==1.26.4
+opencv-python==4.11.0.86
+ultralytics==8.4.132
+ncnn==1.0.20260526
+pillow==11.3.0
+PyYAML==6.0.2
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1

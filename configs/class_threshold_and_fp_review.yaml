@@ -1,0 +1,32 @@
+schema_version: 1
+dataset_version: dfire_seed42_val10_v1
+split: val
+
+profiles:
+  sensitivity:
+    label: Sensibilidad · YOLO26s 768 -> 768
+    experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+    imgsz: 768
+    baseline_smoke_threshold: 0.16
+    baseline_fire_threshold: 0.16
+  balanced:
+    label: Equilibrado · YOLOv8s 768 -> 640
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    imgsz: 640
+    baseline_smoke_threshold: 0.30
+    baseline_fire_threshold: 0.30
+
+smoke_thresholds: [0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.40]
+fire_thresholds: [0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34, 0.35]
+
+prediction_confidence: 0.01
+reference_threshold: 0.25
+match_iou: 0.50
+nms_iou: 0.70
+chunk_size: 2
+ram_limit_gib: 10.0
+seed: 42
+alarm_budget: 0.02
+recall_tolerance: 0.01
+size_area_boundaries: [0.01, 0.10]
+gallery_images: 27

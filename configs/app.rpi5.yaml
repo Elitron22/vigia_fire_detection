@@ -1,0 +1,37 @@
+schema_version: 1
+
+server:
+  # La interfaz se alcanza desde el PC mediante un tunel SSH; no se publica
+  # directamente en la red local.
+  host: 127.0.0.1
+  port: 8000
+  max_upload_mib: 200
+
+inference:
+  default_experiment_id: yolo26s_final_rpi5
+  device: cpu
+  imgsz: 768
+  confidence: 0.16
+  nms_iou: 0.70
+  # Reduce el coste de los vídeos subidos; la cámara web sigue procesando
+  # secuencialmente para no acumular fotogramas.
+  video_stride: 2
+  allow_runtime_overrides: false
+
+alerts:
+  enabled: true
+  hold_seconds: 3.0
+  clear_seconds: 5.0
+  cooldown_seconds: 60.0
+  maximum_gap_seconds: 0.75
+  minimum_confidence:
+    smoke: 0.36
+    fire: 0.16
+
+telegram:
+  mode: dry_run
+  timeout_seconds: 10.0
+
+storage:
+  output_directory: artifacts/08_detection_app
+  event_log: artifacts/08_detection_app/events.jsonl

@@ -1,0 +1,199 @@
+schema_version: 1
+analysis_id: dfire_all_models_01pct_v1
+dataset_version: dfire_seed42_val10_v1
+split: val
+test_locked: true
+
+prediction_confidence: 0.01
+match_iou: 0.50
+nms_iou: 0.70
+size_area_boundaries: [0.01, 0.10]
+threshold_search:
+  minimum: 0.16
+  maximum: 0.60
+  step: 0.01
+alarm_budget: 0.01
+selection_objective: macro_recall
+tie_breakers: [minimum_class_recall, micro_f1, micro_precision]
+seed: 42
+ram_limit_gib: 10.0
+
+standard_sources:
+  initial: artifacts/04_model_comparison/validation/validation_standard_metrics.csv
+  resolution: artifacts/06_resolution_comparison/validation/20260912T150556Z_f0565f74/standard_metrics.csv
+  architecture: artifacts/09_architecture_768_comparison/validation/20260912T222802Z_a9b49dd6/standard_metrics.csv
+
+configurations:
+  yolov8n_640_eval640:
+    label: YOLOv8n 640→640
+    experiment_id: yolov8n_dfire_seed42_20260830T174159Z
+    trained_imgsz: 640
+    eval_imgsz: 640
+    chunk_size: 4
+    comparison_group: full_training
+    standard_source: initial
+    standard_key_column: experiment_id
+    standard_key: yolov8n_dfire_seed42_20260830T174159Z
+  yolo26n_640_eval640:
+    label: YOLO26n 640→640
+    experiment_id: yolo26n_dfire_seed42_20260831T074308Z
+    trained_imgsz: 640
+    eval_imgsz: 640
+    chunk_size: 4
+    comparison_group: full_training
+    standard_source: initial
+    standard_key_column: experiment_id
+    standard_key: yolo26n_dfire_seed42_20260831T074308Z
+  yolov8s_640_eval640:
+    label: YOLOv8s 640→640
+    experiment_id: legacy_yolov8s_baseline
+    trained_imgsz: 640
+    eval_imgsz: 640
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train640_eval640
+  yolov8s_640_eval768:
+    label: YOLOv8s 640→768
+    experiment_id: legacy_yolov8s_baseline
+    trained_imgsz: 640
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train640_eval768
+  yolov8s_640_eval1024:
+    label: YOLOv8s 640→1024
+    experiment_id: legacy_yolov8s_baseline
+    trained_imgsz: 640
+    eval_imgsz: 1024
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train640_eval1024
+  yolo26s_640_eval640:
+    label: YOLO26s 640→640
+    experiment_id: yolo26s_dfire_seed42_20260830T225658Z
+    trained_imgsz: 640
+    eval_imgsz: 640
+    chunk_size: 4
+    comparison_group: full_training
+    standard_source: initial
+    standard_key_column: experiment_id
+    standard_key: yolo26s_dfire_seed42_20260830T225658Z
+  yolov8s_768_eval640:
+    label: YOLOv8s 768→640
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    trained_imgsz: 768
+    eval_imgsz: 640
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train768_eval640
+  yolov8s_768_eval768:
+    label: YOLOv8s 768→768
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train768_eval768
+  yolov8s_768_eval1024:
+    label: YOLOv8s 768→1024
+    experiment_id: yolov8s_dfire_seed42_20260912T104424Z
+    trained_imgsz: 768
+    eval_imgsz: 1024
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train768_eval1024
+  yolo26s_768_eval640:
+    label: YOLO26s 768→640
+    experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+    trained_imgsz: 768
+    eval_imgsz: 640
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: architecture
+    standard_key_column: configuration
+    standard_key: yolo26s_768_eval640
+  yolo26s_768_eval768:
+    label: YOLO26s 768→768
+    experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: architecture
+    standard_key_column: configuration
+    standard_key: yolo26s_768_eval768
+  yolov8s_1024_eval640:
+    label: YOLOv8s 1024→640
+    experiment_id: yolov8s_dfire_seed42_20260912T000125Z
+    trained_imgsz: 1024
+    eval_imgsz: 640
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train1024_eval640
+  yolov8s_1024_eval768:
+    label: YOLOv8s 1024→768
+    experiment_id: yolov8s_dfire_seed42_20260912T000125Z
+    trained_imgsz: 1024
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train1024_eval768
+  yolov8s_1024_eval1024:
+    label: YOLOv8s 1024→1024
+    experiment_id: yolov8s_dfire_seed42_20260912T000125Z
+    trained_imgsz: 1024
+    eval_imgsz: 1024
+    chunk_size: 2
+    comparison_group: full_training
+    standard_source: resolution
+    standard_key_column: configuration
+    standard_key: train1024_eval1024
+
+  yolo26s_hp01_eval768:
+    label: YOLO26s HP01 50ep 768→768
+    experiment_id: yolo26s_hp01_lr5e4_50ep_seed42
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: hp_screening_50ep
+  yolo26s_hp02_eval768:
+    label: YOLO26s HP02 50ep 768→768
+    experiment_id: yolo26s_hp02_weight_decay1e3_50ep_seed42
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: hp_screening_50ep
+  yolo26s_hp03_eval768:
+    label: YOLO26s HP03 50ep 768→768
+    experiment_id: yolo26s_hp03_conservative_aug_50ep_seed42
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: hp_screening_50ep
+  yolo26s_hp04_eval768:
+    label: YOLO26s HP04 50ep 768→768
+    experiment_id: yolo26s_hp04_lr5e4_conservative_aug_50ep_seed42
+    trained_imgsz: 768
+    eval_imgsz: 768
+    chunk_size: 2
+    comparison_group: hp_screening_50ep
+
+excluded_experiments:
+  - experiment_id: yolov8s_dfire_seed42_20260911T210842Z
+    reason: Ejecución fallida sin checkpoint final comparable.

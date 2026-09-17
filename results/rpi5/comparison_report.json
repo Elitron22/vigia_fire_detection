@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-16T18:31:22.651338+00:00",
+  "status": "passed",
+  "source_split": "val",
+  "test_inference_executed": false,
+  "variants": {
+    "ncnn_768": {
+      "validation_operating_metrics": {
+        "smoke_threshold": 0.415,
+        "fire_threshold": 0.165,
+        "smoke_precision": 0.8769230769230769,
+        "smoke_recall": 0.771875,
+        "smoke_f1": 0.8210526315789474,
+        "fire_precision": 0.5899873257287706,
+        "fire_recall": 0.806060606060606,
+        "fire_f1": 0.68130259787779,
+        "micro_precision": 0.6900536524969046,
+        "micro_recall": 0.7905437352245863,
+        "micro_f1": 0.736888497135302,
+        "macro_recall": 0.788967803030303,
+        "minimum_class_recall": 0.771875,
+        "negative_images_with_alarm": 7,
+        "negative_alarm_rate": 0.008939974457215836,
+        "negative_image_fp_boxes": 8
+      },
+      "recall_by_size": [
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.415,
+          "class_name": "smoke",
+          "size_band": "small",
+          "gt_boxes": 188,
+          "tp": 120,
+          "fn": 68,
+          "recall": 0.6382978723404256
+        },
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.415,
+          "class_name": "smoke",
+          "size_band": "medium",
+          "gt_boxes": 222,
+          "tp": 144,
+          "fn": 78,
+          "recall": 0.6486486486486487
+        },
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.415,
+          "class_name": "smoke",
+          "size_band": "large",
+          "gt_boxes": 550,
+          "tp": 477,
+          "fn": 73,
+          "recall": 0.8672727272727273
+        },
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "small",
+          "gt_boxes": 760,
+          "tp": 599,
+          "fn": 161,
+          "recall": 0.7881578947368421
+        },
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "medium",
+          "gt_boxes": 324,
+          "tp": 267,
+          "fn": 57,
+          "recall": 0.8240740740740741
+        },
+        {
+          "model_key": "ncnn_768",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "large",
+          "gt_boxes": 71,
+          "tp": 65,
+          "fn": 6,
+          "recall": 0.9154929577464789
+        }
+      ],
+      "rpi5_benchmark": {
+        "latency_ms": {
+          "mean": 252.0394521000071,
+          "median": 250.8799749998616,
+          "p95": 261.9681920000403,
+          "minimum": 247.45058200005587,
+          "maximum": 265.8770490002098
+        },
+        "throughput_fps": 3.9676328117203195,
+        "temperature_celsius": {
+          "before": 46.3,
+          "after": 48.5
+        },
+        "throttled": "throttled=0x0",
+        "max_rss_kib": 596848
+      }
+    },
+    "ncnn_640": {
+      "validation_operating_metrics": {
+        "smoke_threshold": 0.365,
+        "fire_threshold": 0.165,
+        "smoke_precision": 0.8568207440811725,
+        "smoke_recall": 0.7916666666666666,
+        "smoke_f1": 0.8229561451001625,
+        "fire_precision": 0.5729426433915212,
+        "fire_recall": 0.7956709956709956,
+        "fire_f1": 0.6661833997825299,
+        "micro_precision": 0.6740264953833802,
+        "micro_recall": 0.7938534278959811,
+        "micro_f1": 0.7290490664350847,
+        "macro_recall": 0.7936688311688311,
+        "minimum_class_recall": 0.7916666666666666,
+        "negative_images_with_alarm": 7,
+        "negative_alarm_rate": 0.008939974457215836,
+        "negative_image_fp_boxes": 10
+      },
+      "recall_by_size": [
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.365,
+          "class_name": "smoke",
+          "size_band": "small",
+          "gt_boxes": 188,
+          "tp": 131,
+          "fn": 57,
+          "recall": 0.6968085106382979
+        },
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.365,
+          "class_name": "smoke",
+          "size_band": "medium",
+          "gt_boxes": 222,
+          "tp": 149,
+          "fn": 73,
+          "recall": 0.6711711711711712
+        },
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.365,
+          "class_name": "smoke",
+          "size_band": "large",
+          "gt_boxes": 550,
+          "tp": 480,
+          "fn": 70,
+          "recall": 0.8727272727272727
+        },
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "small",
+          "gt_boxes": 760,
+          "tp": 585,
+          "fn": 175,
+          "recall": 0.7697368421052632
+        },
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "medium",
+          "gt_boxes": 324,
+          "tp": 270,
+          "fn": 54,
+          "recall": 0.8333333333333334
+        },
+        {
+          "model_key": "ncnn_640",
+          "threshold": 0.165,
+          "class_name": "fire",
+          "size_band": "large",
+          "gt_boxes": 71,
+          "tp": 64,
+          "fn": 7,
+          "recall": 0.9014084507042254
+        }
+      ],
+      "rpi5_benchmark": {
+        "latency_ms": {
+          "mean": 167.41198064996752,
+          "median": 166.36527449963978,
+          "p95": 171.11742599990976,
+          "minimum": 165.73922699990362,
+          "maximum": 172.2121889997652
+        },
+        "throughput_fps": 5.973288148898046,
+        "temperature_celsius": {
+          "before": 45.75,
+          "after": 49.05
+        },
+        "throttled": "throttled=0x0",
+        "max_rss_kib": 579936
+      }
+    }
+  },
+  "ncnn_640_minus_ncnn_768": {
+    "smoke_precision_pp": -2.0102332841904436,
+    "smoke_recall_pp": 1.9791666666666652,
+    "smoke_f1_pp": 0.19035135212150944,
+    "fire_precision_pp": -1.7044682337249317,
+    "fire_recall_pp": -1.0389610389610393,
+    "fire_f1_pp": -1.5119198095260078,
+    "micro_precision_pp": -1.6027157113524426,
+    "micro_recall_pp": 0.3309692671394804,
+    "micro_f1_pp": -0.7839430700217309,
+    "macro_recall_pp": 0.47010281385281294,
+    "minimum_class_recall_pp": 1.9791666666666652,
+    "negative_alarm_rate_pp": 0.0,
+    "latency_reduction_percent": 33.57707324981016,
+    "throughput_increase_percent": 50.55042722837293,
+    "speedup_factor": 1.5055042722837293
+  },
+  "decision_checks": {
+    "validation_only": true,
+    "test_inference_was_not_executed": true,
+    "both_meet_negative_alarm_budget": true,
+    "micro_f1_drop_at_most_1pp": true,
+    "fire_recall_drop_at_most_1_5pp": true,
+    "latency_reduction_at_least_25pct": true
+  },
+  "recommendation": "ncnn_640",
+  "note": "Comparación operativa en validación y rendimiento real en Raspberry Pi 5; test permanece bloqueado."
+}

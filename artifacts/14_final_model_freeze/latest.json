@@ -1,0 +1,5 @@
+{
+  "run_rel": "artifacts/14_final_model_freeze/final",
+  "weights_sha256": "bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67",
+  "freeze_manifest_sha256": "2df1647cfed96ee549a81510939c64e1242fe2884163572c80e67ec5bb8c516b"
+}

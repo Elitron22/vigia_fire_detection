@@ -1,0 +1,44 @@
+schema_version: 1
+dataset_version: dfire_seed42_val10_v1
+split: test
+selection_locked: true
+single_final_evaluation: true
+threshold_search_allowed: false
+
+model:
+  label: YOLO26s 768→768
+  model_key: yolo26s
+  family: YOLO26
+  scale: small
+  experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+  trained_imgsz: 768
+  inference_imgsz: 768
+  source_weights: artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/train/weights/best.pt
+  source_weights_sha256: bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67
+
+operating_point:
+  smoke_threshold: 0.36
+  fire_threshold: 0.16
+  maximum_negative_alarm_rate: 0.01
+  match_iou: 0.50
+  prediction_confidence: 0.01
+  nms_iou: 0.70
+  size_area_boundaries: [0.01, 0.10]
+
+expected_test:
+  images: 4306
+  negative_images: 2005
+  smoke_boxes: 2311
+  fire_boxes: 2878
+
+runtime:
+  standard_batch: 16
+  prediction_chunk_size: 8
+  seed: 42
+  ram_limit_gib: 8.0
+
+validation_source: artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b
+known_prior_test_exposure: artifacts/01_dfire_yolov8s_baseline/executions/20260829T231812Z/test_evaluation_summary.json
+freeze_parent: artifacts/14_final_model_freeze
+output_parent: artifacts/15_final_test_evaluation/test
+

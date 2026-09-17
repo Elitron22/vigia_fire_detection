@@ -1,0 +1,5 @@
+category,official_train_images,validation_target,validation_actual,validation_exact_hash_groups
+background,7833,783,783,783
+fire,944,94,94,94
+smoke,4681,468,468,468
+smoke+fire,3763,376,376,376

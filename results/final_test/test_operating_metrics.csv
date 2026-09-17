@@ -1,0 +1,2 @@
+scope,tp,fp,fn,precision,recall,f1,macro_recall,minimum_class_recall,smoke_threshold,fire_threshold
+all_micro,4012,1898,1177,0.678849407783418,0.773174021969551,0.7229480133345346,0.7752709418561679,0.7560806115357888,0.36,0.16

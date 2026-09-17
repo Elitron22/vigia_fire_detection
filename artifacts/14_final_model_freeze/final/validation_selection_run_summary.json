@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "run_id": "20260914T205147Z_65e09e1b",
+  "created_utc": "2026-09-14T20:51:52.860933+00:00",
+  "split": "val",
+  "dataset_version": "dfire_seed42_val10_v1",
+  "test_inference_executed": false,
+  "selected_candidate": "yolo26s",
+  "selected_label": "YOLO26s 768→768",
+  "selected_experiment_id": "yolo26s_dfire_seed42_20260912T165304Z",
+  "selected_smoke_threshold": 0.36,
+  "selected_fire_threshold": 0.16,
+  "source_runs": {
+    "architecture": {
+      "run_id": "20260912T222802Z_a9b49dd6",
+      "run_rel": "artifacts/09_architecture_768_comparison/validation/20260912T222802Z_a9b49dd6",
+      "summary_sha256": "9ed6b2c4878a83d5ddb702d0a0dd9d41d1e32e392087eb33c35e6fb43f0e1d31"
+    },
+    "threshold_review": {
+      "run_id": "20260913T092050Z_11e54fc4",
+      "run_rel": "artifacts/10_class_threshold_fp_review/validation/20260913T092050Z_11e54fc4",
+      "summary_sha256": "05d8a1afa79883943669ff9bcb20790ea4f9a0d3b57f3b0b5fca68a7c2cb1c0e"
+    }
+  },
+  "source_test_flags": [
+    false,
+    false
+  ],
+  "images": 1721,
+  "negative_images": 783,
+  "output_hashes": {
+    "alarm_budget_comparison.csv": "6e7775c62ba3a42a12996ff334b21cf1e5c64bd1d565ffa2054c539d7a3afb80",
+    "class_metrics.csv": "6395476c2c695b369f9ea15490e47e362527085248ba6b20ef2bd314d4bf5dd4",
+    "class_threshold_grid_01pct.csv": "e7e44f98e6d0ac5580ac5d53a6d6866290f3496ddc8bb7b221ed4689fb750967",
+    "config.yaml": "65e09e1b82fcfc22e1990c432f579bfcf73b39dad66f8202874c245edcaecf6c",
+    "error_comparison.csv": "809b3138c6418685946b1f187c8f4e1813fb39d4562388b2a51b04d5b6283c8a",
+    "final_operating_points.csv": "a8c9283e2e38d27061947f2548949a80f3957cfe23834f538858e92847b99c8e",
+    "manual_fp_review_summary.csv": "b99c194be6ae2db54ce5e05f5fc91a117ab9be4acd7cc1ba47251bdae836538d",
+    "paired_comparison_768.csv": "5368f74d720aecfba7b3d32db88171773df636c51dda9c9a6bfddda1fab64922",
+    "RESUMEN_SELECCION_VALIDACION.md": "8a6fed267d893d23d2ff8da5d5372a7422d01cf682908b5ed04a823856c23879",
+    "size_metrics.csv": "0857c1d3498da61d3b256c7668308949dd03ceaf154b80bc6f33383b1ac33cf5",
+    "standard_metrics.csv": "4dbbaea8008d5d018f1908c1cd589a3717152f27f141bd5742347513a683f68a",
+    "training_resources.csv": "be3345120db48a244536e7a7aef0969ad00257da7954f4fc40f29c9c35d4c5f0",
+    "yolo26_fp_geometric_summary.csv": "32e91ba5876a80cd820115f36018c40261d401c0690c337ff022800555510151",
+    "code/run_final_validation_selection.py": "257f6adf7c179d6ca5a62132e53fea096daf56f35cf839c7d92c460b50c95c03",
+    "code/verify_final_validation_selection.py": "2e580241486170a45698b07e9a6db9650915e274a55982293b1070db82ed93e1",
+    "figures/01_global_operating_comparison.png": "309cd47d3c773a69ce7dc73c86dc5eb893b652d785802d9fb73f340bdab4e25f",
+    "figures/02_class_and_size_recall.png": "e969038fd45b6560637091eaeff46b04d54652867468160d59148951c60457ca",
+    "figures/03_fp_fn_comparison.png": "5a68928572a42e1d5a9dee9ac3ca9d52e0fe47a021b07a1c3c79e62fbbda555d",
+    "figures/04_alarm_budget_comparison.png": "8b9700b341bf1dfa4d2397852fb268ac43467f6349ff2f4f8c93ccf736a0ddff"
+  },
+  "figures": [
+    "artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b/figures/01_global_operating_comparison.png",
+    "artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b/figures/02_class_and_size_recall.png",
+    "artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b/figures/03_fp_fn_comparison.png",
+    "artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b/figures/04_alarm_budget_comparison.png"
+  ]
+}

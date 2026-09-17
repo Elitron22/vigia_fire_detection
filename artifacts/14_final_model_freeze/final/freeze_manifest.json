@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "frozen_at_utc": "2026-09-14T22:49:46.666293+00:00",
+  "selection_stage": "before_final_yolo26s_test_evaluation",
+  "model_label": "YOLO26s 768→768",
+  "model_key": "yolo26s",
+  "experiment_id": "yolo26s_dfire_seed42_20260912T165304Z",
+  "trained_imgsz": 768,
+  "inference_imgsz": 768,
+  "smoke_threshold": 0.36,
+  "fire_threshold": 0.16,
+  "maximum_negative_alarm_rate": 0.01,
+  "source_weights_rel": "artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/train/weights/best.pt",
+  "frozen_weights_rel": "weights/best.pt",
+  "weights_sha256": "bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67",
+  "weights_bytes": 20309829,
+  "dataset_version": "dfire_seed42_val10_v1",
+  "dataset_manifest_sha256": "97442af38322abe1bf5178bd6b92c30971d9f354eca3197762bb7a4a4b8c8eb6",
+  "validation_source_rel": "artifacts/12_final_validation_selection/validation/20260914T205147Z_65e09e1b",
+  "validation_source_sha256": "046762330c3633db2beae04b5880a99a48cc389d0d001ba719c0e364134051f5",
+  "selection_rationale": "Selección explícita del usuario: equilibrio entre clases y mayor recall de fuego frente al candidato 640→640.",
+  "test_policy": {
+    "single_final_evaluation": true,
+    "threshold_search_allowed": false,
+    "model_comparison_allowed": false,
+    "post_test_changes_allowed": false
+  },
+  "known_prior_test_exposure": {
+    "exists": true,
+    "model": "legacy YOLOv8s baseline",
+    "path_rel": "artifacts/01_dfire_yolov8s_baseline/executions/20260829T231812Z/test_evaluation_summary.json",
+    "note": "Exposición histórica anterior; el YOLO26s congelado no había sido evaluado en test."
+  }
+}

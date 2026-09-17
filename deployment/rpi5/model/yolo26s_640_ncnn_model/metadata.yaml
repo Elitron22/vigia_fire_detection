@@ -1,0 +1,21 @@
+description: Ultralytics YOLO26s model trained on /workspace/TFM/artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/data_runtime.yaml
+author: Ultralytics
+date: '2026-09-16T18:22:43.276173+00:00'
+version: 8.4.132
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+head: Detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: smoke
+  1: fire
+args:
+  batch: 1
+  quantize: null
+channels: 3
+end2end: false

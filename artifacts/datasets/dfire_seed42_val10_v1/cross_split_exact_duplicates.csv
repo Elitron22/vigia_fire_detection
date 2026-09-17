@@ -1,0 +1,1 @@
+split,image_path,label_path,filename,width,height,image_format,aspect_ratio,label_exists,label_empty,box_count,smoke_boxes,fire_boxes,source_smoke_boxes,source_fire_boxes,category,sha256,dhash,repaired_boxes,dropped_degenerate_boxes,jpeg_missing_eoi,official_split

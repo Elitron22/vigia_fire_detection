@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-16T18:22:47.482676+00:00",
+  "format": "ncnn",
+  "source_model": "YOLO26s 768→640",
+  "source_experiment_id": "yolo26s_dfire_seed42_20260912T165304Z",
+  "source_weights_sha256": "bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67",
+  "imgsz": 640,
+  "smoke_threshold": 0.36,
+  "fire_threshold": 0.16,
+  "ultralytics_version": "8.4.132",
+  "files": {
+    "metadata.yaml": "bef7f627618837b5d78e5406e600eb8b5cece656cab16c529ef37c151d109b0a",
+    "model.ncnn.bin": "2ddbba9e6587dd06863e7890cc2c196fb7dabec956aa2b2005e1b7e9c2f6be77",
+    "model.ncnn.param": "3014cc860f9a2e5eae9cb8210c53b845ed6cf30eae34160beb1c2b5b8f7a9211",
+    "model_ncnn.py": "a35d1f578e3ad81c56aef5320e468851e195fa45a222f0a88892fdeceffa4b64"
+  }
+}

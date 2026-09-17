@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-16T18:28:40.381902+00:00",
+  "platform": {
+    "machine": "aarch64",
+    "platform": "Linux-6.18.50+rpt-rpi-2712-aarch64-with-glibc2.41",
+    "python": "3.13.5"
+  },
+  "ultralytics_version": "8.4.132",
+  "model": "/home/fireai/tfm-fire-rpi5-ncnn/model/yolo26s_640_ncnn_model",
+  "images": 6,
+  "warmup_runs": 3,
+  "measured_runs": 20,
+  "imgsz": 640,
+  "class_thresholds": {
+    "smoke": 0.365,
+    "fire": 0.165
+  },
+  "latency_ms": {
+    "mean": 167.41198064996752,
+    "median": 166.36527449963978,
+    "p95": 171.11742599990976,
+    "minimum": 165.73922699990362,
+    "maximum": 172.2121889997652
+  },
+  "throughput_fps_from_mean": 5.973288148898046,
+  "detections_after_final_thresholds": {
+    "smoke": 19,
+    "fire": 61
+  },
+  "temperature_celsius": {
+    "before": 45.75,
+    "after": 49.05
+  },
+  "throttled": "throttled=0x0",
+  "max_rss_kib": 579936
+}

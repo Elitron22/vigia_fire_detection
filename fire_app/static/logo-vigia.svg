@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Vigía</title>
+  <rect width="512" height="512" rx="112" fill="#f3f0e7"/>
+  <path d="M256 48C355 48 420 123 420 226c0 129-65 226-164 238C157 452 92 355 92 226 92 123 157 48 256 48Z" fill="#173f2b"/>
+  <text x="256" y="342" fill="#ffffff" font-family="Georgia, 'Times New Roman', serif" font-size="250" text-anchor="middle">V</text>
+</svg>

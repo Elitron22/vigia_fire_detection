@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vigía · Detección forestal</title>
+  <meta name="description" content="Demostrador del TFM para detectar humo y fuego en imágenes, vídeos y cámara.">
+  <link rel="icon" href="/static/logo-vigia.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css?v=20260917-3">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Inicio de Vigía">
+      <img class="brand-mark" src="/static/logo-vigia.svg" alt="" width="38" height="38">
+      <span><strong>Vigía</strong><small>Detección forestal</small></span>
+    </a>
+    <div class="system-status"><span id="health-dot" class="status-dot"></span><span id="health-text">comprobando</span></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">TFM · VISIÓN ARTIFICIAL</p>
+      <h1>Detecta señales de incendio<br><em>antes de que avancen.</em></h1>
+      <p class="hero-copy">Analiza imágenes, vídeos o una cámara en directo para detectar de forma temprana señales de humo y fuego. Las alertas solo se activan cuando la señal persiste.</p>
+      <div class="hero-stats">
+        <div><strong>2</strong><span>clases<br>humo y fuego</span></div>
+        <div><strong id="model-count">—</strong><span>modelos<br>disponibles</span></div>
+        <div><strong id="device-label">—</strong><span>dispositivo<br>de inferencia</span></div>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Área de análisis">
+      <aside class="settings-panel">
+        <div class="panel-heading">
+          <span class="step-number">01</span>
+          <div><p class="eyebrow">CONFIGURACIÓN</p><h2>Ajustes de detección</h2></div>
+        </div>
+        <div class="recommended-profile">
+          <strong>Configuración recomendada activa</strong>
+          <span>Lista para analizar humo y fuego sin realizar ajustes manuales.</span>
+        </div>
+
+        <details class="settings-disclosure">
+          <summary><strong>Ajustes avanzados</strong><span>Modelo, umbrales y persistencia</span></summary>
+          <div class="disclosure-content">
+            <label>Modelo de detección
+              <select id="model-select"></select>
+            </label>
+            <label>Umbral de humo <output id="smoke-threshold-output">0,365</output>
+              <input id="smoke-threshold" type="range" min="0.01" max="0.95" step="0.005" value="0.365">
+            </label>
+            <label>Umbral de fuego <output id="fire-threshold-output">0,165</output>
+              <input id="fire-threshold" type="range" min="0.01" max="0.95" step="0.005" value="0.165">
+            </label>
+            <button id="reset-thresholds" class="secondary-button threshold-reset" type="button" disabled>Restaurar valores recomendados</button>
+            <label>Tiempo mínimo para alertar <output id="hold-output">3,0 s</output>
+              <input id="hold-seconds" type="range" min="0" max="15" step="0.5" value="3">
+            </label>
+          </div>
+        </details>
+
+        <details class="settings-disclosure diagnostic-disclosure">
+          <summary><strong>Diagnóstico del sistema</strong><span>Estado de Telegram y prueba de conexión</span></summary>
+          <div class="disclosure-content">
+            <div id="telegram-state" class="info-card">Telegram: cargando…</div>
+            <button id="test-telegram" class="secondary-button threshold-reset" type="button" disabled>Enviar mensaje de prueba</button>
+          </div>
+        </details>
+      </aside>
+
+      <div class="analysis-panel">
+        <div class="panel-heading">
+          <span class="step-number">02</span>
+          <div><p class="eyebrow">FUENTE</p><h2>Selecciona qué analizar</h2></div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Tipo de entrada">
+          <button class="tab active" data-tab="image" role="tab" aria-selected="true" aria-controls="panel-image">Imagen</button>
+          <button class="tab" data-tab="video" role="tab" aria-selected="false" aria-controls="panel-video">Vídeo</button>
+          <button class="tab" data-tab="camera" role="tab" aria-selected="false" aria-controls="panel-camera">Cámara</button>
+        </div>
+
+        <section id="panel-image" class="tab-panel active" role="tabpanel">
+          <label class="dropzone" id="image-dropzone" tabindex="0" role="button" aria-label="Seleccionar imagen para analizar">
+            <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+            <span class="upload-icon" aria-hidden="true">↗</span>
+            <strong>Suelta una imagen aquí</strong>
+            <span>o pulsa para elegir JPG, PNG o WebP</span>
+          </label>
+          <button id="analyze-image" class="primary-button" disabled>Analizar imagen</button>
+        </section>
+
+        <section id="panel-video" class="tab-panel" role="tabpanel">
+          <label class="dropzone" id="video-dropzone" tabindex="0" role="button" aria-label="Seleccionar vídeo para analizar">
+            <input id="video-input" type="file" accept="video/*" hidden>
+            <span class="upload-icon" aria-hidden="true">▶</span>
+            <strong>Selecciona un vídeo</strong>
+            <span>Podrás visualizar y descargar el vídeo procesado</span>
+          </label>
+          <p id="video-estimate" class="processing-estimate" role="status" aria-live="polite">Selecciona un vídeo para calcular el tiempo aproximado.</p>
+          <button id="analyze-video" class="primary-button" disabled>Procesar vídeo</button>
+        </section>
+
+        <section id="panel-camera" class="tab-panel" role="tabpanel">
+          <div class="camera-actions">
+            <button id="start-camera" class="primary-button">Iniciar cámara</button>
+            <button id="stop-camera" class="secondary-button" disabled>Detener</button>
+          </div>
+          <video id="camera-source" autoplay muted playsinline hidden></video>
+          <canvas id="camera-canvas" hidden></canvas>
+          <p class="privacy-note">La cámara es la del navegador; la inferencia se ejecuta en el servidor.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="results-section">
+      <div class="results-heading">
+        <div><p class="eyebrow">RESULTADO</p><h2>Inspección visual</h2></div>
+        <div id="run-badge" class="run-badge">Sin análisis</div>
+      </div>
+      <div class="result-grid">
+        <div class="viewer" id="viewer">
+          <div id="empty-state" class="empty-state"><span>◎</span><p>El resultado anotado aparecerá aquí.</p></div>
+          <img id="result-image" alt="Resultado de detección" hidden>
+          <video id="result-video" controls playsinline hidden></video>
+        </div>
+        <aside class="detection-panel">
+          <h3>Detecciones</h3>
+          <div id="detection-summary" class="detection-summary"><p class="muted">Todavía no hay resultados.</p></div>
+          <div class="metric-row"><span>Tiempo por fotograma</span><strong id="processing-time">—</strong></div>
+          <div class="metric-row"><span>Estado de alerta</span><strong id="alert-status">Inactivo</strong></div>
+          <div id="event-list" class="event-list" aria-live="polite"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js?v=20260917-3" defer></script>
+</body>
+</html>

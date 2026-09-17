@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "experiment_id": "yolo26s_dfire_seed42_20260912T165304Z",
+  "queue_position": 1,
+  "created_utc": "2026-09-12T16:53:04.102952+00:00",
+  "status": "complete",
+  "model_key": "yolo26s",
+  "model_family": "YOLO26",
+  "model_scale": "small",
+  "initial_weights": "yolo26s.pt",
+  "dataset_version": "dfire_seed42_val10_v1",
+  "dataset_manifest_sha256": "97442af38322abe1bf5178bd6b92c30971d9f354eca3197762bb7a4a4b8c8eb6",
+  "profile": "controlled_768",
+  "seed": 42,
+  "train_config": {
+    "imgsz": 768,
+    "epochs": 100,
+    "batch": 16,
+    "patience": 20,
+    "optimizer": "AdamW",
+    "lr0": 0.001,
+    "cos_lr": true,
+    "amp": true,
+    "deterministic": true,
+    "save_period": 10,
+    "cache": false
+  },
+  "training_run_dir_rel": "artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/train",
+  "best_model_rel": "artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/train/weights/best.pt",
+  "last_model_rel": "artifacts/experiments/yolo26s_dfire_seed42_20260912T165304Z/train/weights/last.pt",
+  "completed_utc": "2026-09-12T21:02:30.286698+00:00"
+}

@@ -1,0 +1,30 @@
+name: tfm-vigia-demo
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tfm-vigia:1.0.0
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      TFM_PROJECT_ROOT: /app
+      TFM_APP_CONFIG: /app/configs/app.release.yaml
+      TFM_APP_DEVICE: cpu
+      TFM_APP_MODEL_PATH: /app/deployment/rpi5/model/yolo26s_640_ncnn_model
+      TFM_APP_MODEL_ID: yolo26s_640_ncnn_rpi5
+      TFM_APP_MODEL_KEY: yolo26s
+      TFM_APP_TRAINED_IMGSZ: "768"
+      TFM_TELEGRAM_MODE: "${TFM_TELEGRAM_MODE:-dry_run}"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+      TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
+    volumes:
+      - ./runtime:/app/runtime
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 12
+      start_period: 45s
+    restart: unless-stopped

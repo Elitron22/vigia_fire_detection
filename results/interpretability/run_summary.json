@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "run_id": "20260915T154734Z_649d1859",
+  "created_at_utc": "2026-09-15T15:47:44.360663+00:00",
+  "split": "val",
+  "test_inference_executed": false,
+  "threshold_search_executed": false,
+  "model": {
+    "label": "YOLO26s 768→768",
+    "experiment_id": "yolo26s_dfire_seed42_20260912T165304Z",
+    "weights": "artifacts/14_final_model_freeze/final/weights/best.pt",
+    "weights_sha256": "bfb54c4726519fb473bb7c4825577e51c05af2b0db5fd46bf1931a8a29285f67",
+    "imgsz": 768
+  },
+  "operating_point": {
+    "smoke_threshold": 0.36,
+    "fire_threshold": 0.16,
+    "match_iou": 0.5
+  },
+  "config_sha256": "649d1859435ff640108d2bc36ba22fca734931a8ff8b0ec2c3a53696d07750f9",
+  "validation_cache_summary_sha256": "5d5353d492099c40756b19adea9f005de3566d1e3246f385171ce0b77de87351",
+  "selected_cases": 6,
+  "methods": [
+    "multiscale_eigencam",
+    "occlusion_sensitivity",
+    "deletion_faithfulness"
+  ],
+  "figures": [
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/01_true_positive_smoke_WEB06295.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/02_true_positive_fire_WEB03832.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/03_negative_false_alarm_smoke_WEB00156.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/04_negative_false_alarm_fire_WEB02251.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/05_borderline_false_negative_smoke_WEB05832.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/06_borderline_false_negative_fire_WEB05014.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/cases/06_borderline_false_negative_fire_WEB05014.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/08_faithfulness_by_case.png",
+    "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/figures/09_interpretability_contact_sheet.png"
+  ],
+  "report_rel": "artifacts/16_model_interpretability/validation/20260915T154734Z_649d1859/RESUMEN_INTERPRETABILIDAD.md",
+  "output_hashes": {
+    "config.yaml": "649d1859435ff640108d2bc36ba22fca734931a8ff8b0ec2c3a53696d07750f9",
+    "deletion_curves.csv": "a41d0823fc65ea3a1ba2a0611cca5e2659a0d66dc661b6cfdff2f6fc40b087d6",
+    "interpretability_metrics.csv": "641996f17d25b43c0f41d4a2d417c7781ce6ca1ad3e56c30efb1bd3de4ace067",
+    "RESUMEN_INTERPRETABILIDAD.md": "be37653eed4b691c10840af1175850970a4dcb85976f47c3c613a19e4e1b2099",
+    "selected_cases.csv": "d5f51460e2794ec655da45667769273fb07faa89168f87b2dbf9cb932605f9b1",
+    "code/run_model_interpretability.py": "80efa6c55ff9b3bc17e2d862326e30386c18090ed7297a201671fcb31cefb622",
+    "code/tfm_interpretability.py": "a582cbef38a67431a3719a20c3d4ad4fe48e40af520540489019479ee828fa38",
+    "code/verify_model_interpretability.py": "a60403eceb4c2739dba7f26f9987f6fba754be1170b37c65ded38df54f1dca89",
+    "figures/07_deletion_curve.png": "3d29054c8e9b95149de100649359699e67764759c66aeb37a50b2a8cda49a9cb",
+    "figures/08_faithfulness_by_case.png": "559493dd4c4b4267f6bea55d6a1e523fbcc6d8bde3b96177c6e9f448eac7c257",
+    "figures/09_interpretability_contact_sheet.png": "8909e3def1522b4076fb56c5ef22b4d879576a118faf4016b272f23ea70dde2f",
+    "maps/01_WEB06295.npz": "3559de4f7edbe5853cffdffe78c0711f1591f9b7cf5e1505a32c78d54a3c8988",
+    "maps/02_WEB03832.npz": "e6e7ef5464b2d10fca4d213d3f65b22bab9ea08695b8b5cb2683bb7032a0e46f",
+    "maps/03_WEB00156.npz": "db9e7b30ae17a206a1343c9421291653926e892e69d17b2732c3ab9b57840d31",
+    "maps/04_WEB02251.npz": "bf9304aff5cb90459d0a8df6905437b8129354e539ad09a5bd3cdd4a122d6574",
+    "maps/05_WEB05832.npz": "99886e33653f435f0cc8e67f9fe031610e695456c1d64e476540589689071d91",
+    "maps/06_WEB05014.npz": "ca7934993207a45a3e7f3d6de27a0d7ac3153ea9cc3775d967ccad92127d0b72",
+    "figures/cases/01_true_positive_smoke_WEB06295.png": "c2874cc859e22aad9d316b97a524541c3dbca767c78ac0cbd355c0277a4c6580",
+    "figures/cases/02_true_positive_fire_WEB03832.png": "62263f4623bbf4bb9cf4b7cd96d857ccaa8052291cbda882b91fc6941bc70567",
+    "figures/cases/03_negative_false_alarm_smoke_WEB00156.png": "651602339c2518f2d243af3449e54fe74f4e59b128d00822cc7bbe37a8631b76",
+    "figures/cases/04_negative_false_alarm_fire_WEB02251.png": "5eb0a709bf87753ccf703fcc6dc2e225d7f0e49a36f3ec441ee7623bbb042e8a",
+    "figures/cases/05_borderline_false_negative_smoke_WEB05832.png": "b0178376d1604f04974a3276533efb3af7e6a77ad28cb8173c54eb35bc727d3a",
+    "figures/cases/06_borderline_false_negative_fire_WEB05014.png": "ffeb4d8b5041c76ec9efae8ca4c0c477559803cf53e66107449bb51770341f47"
+  }
+}

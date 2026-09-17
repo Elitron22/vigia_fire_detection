@@ -1,0 +1,43 @@
+schema_version: 1
+
+server:
+  host: 127.0.0.1
+  port: 8003
+  max_upload_mib: 200
+
+inference:
+  default_experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+  selectable_models:
+    yolo26s_640_ncnn_rpi5: 640
+    yolo26s_dfire_seed42_20260912T165304Z: 768
+  device: cpu
+  imgsz: 640
+  confidence: 0.165
+  nms_iou: 0.70
+  video_stride: 2
+  allow_runtime_overrides: false
+
+alerts:
+  enabled: true
+  hold_seconds: 3.0
+  clear_seconds: 5.0
+  cooldown_seconds: 60.0
+  maximum_gap_seconds: 0.75
+  minimum_confidence:
+    smoke: 0.365
+    fire: 0.165
+  model_minimum_confidence:
+    yolo26s_640_ncnn_rpi5:
+      smoke: 0.365
+      fire: 0.165
+    yolo26s_dfire_seed42_20260912T165304Z:
+      smoke: 0.36
+      fire: 0.16
+
+telegram:
+  mode: dry_run
+  timeout_seconds: 10.0
+
+storage:
+  output_directory: artifacts/08_detection_app_ncnn640
+  event_log: artifacts/08_detection_app_ncnn640/events.jsonl

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-16T18:27:14.894807+00:00",
+  "status": "failed",
+  "split": "val",
+  "test_inference_executed": false,
+  "model_path": "/workspace/TFM/deployment/rpi5/model/yolo26s_640_ncnn_model",
+  "operating_point": {
+    "imgsz": 640,
+    "smoke_threshold": 0.36,
+    "fire_threshold": 0.16
+  },
+  "images": 1721,
+  "negative_images": 783,
+  "ncnn_metrics": {
+    "profile": "yolo26s_ncnn",
+    "smoke_threshold": 0.36,
+    "fire_threshold": 0.16,
+    "smoke_tp": 760,
+    "smoke_fp": 134,
+    "smoke_fn": 200,
+    "smoke_precision": 0.8501118568232662,
+    "smoke_recall": 0.7916666666666666,
+    "smoke_f1": 0.819848975188781,
+    "fire_tp": 920,
+    "fire_fp": 702,
+    "fire_fn": 235,
+    "fire_precision": 0.5672009864364982,
+    "fire_recall": 0.7965367965367965,
+    "fire_f1": 0.6625855239467051,
+    "micro_tp": 1680,
+    "micro_fp": 836,
+    "micro_fn": 435,
+    "micro_precision": 0.6677265500794912,
+    "micro_recall": 0.7943262411347518,
+    "micro_f1": 0.7255452386093717,
+    "macro_recall": 0.7941017316017316,
+    "minimum_class_recall": 0.7916666666666666,
+    "negative_images": 783,
+    "negative_images_with_alarm": 8,
+    "negative_alarm_rate": 0.010217113665389528,
+    "positive_image_fp_boxes": 825,
+    "negative_image_fp_boxes": 11
+  },
+  "comparisons": {
+    "smoke_precision": {
+      "pytorch": 0.8581081081081081,
+      "ncnn": 0.8501118568232662,
+      "delta": -0.007996251284841938
+    },
+    "smoke_recall": {
+      "pytorch": 0.79375,
+      "ncnn": 0.7916666666666666,
+      "delta": -0.002083333333333326
+    },
+    "smoke_f1": {
+      "pytorch": 0.8246753246753247,
+      "ncnn": 0.819848975188781,
+      "delta": -0.004826349486543702
+    },
+    "fire_precision": {
+      "pytorch": 0.590110605074821,
+      "ncnn": 0.5672009864364982,
+      "delta": -0.02290961863832286
+    },
+    "fire_recall": {
+      "pytorch": 0.7852813852813852,
+      "ncnn": 0.7965367965367965,
+      "delta": 0.011255411255411296
+    },
+    "fire_f1": {
+      "pytorch": 0.673848439821694,
+      "ncnn": 0.6625855239467051,
+      "delta": -0.011262915874988844
+    },
+    "micro_precision": {
+      "pytorch": 0.6882474226804124,
+      "ncnn": 0.6677265500794912,
+      "delta": -0.02052087260092117
+    },
+    "micro_recall": {
+      "pytorch": 0.7891252955082743,
+      "ncnn": 0.7943262411347518,
+      "delta": 0.005200945626477549
+    },
+    "micro_f1": {
+      "pytorch": 0.7352422907488987,
+      "ncnn": 0.7255452386093717,
+      "delta": -0.009697052139526985
+    },
+    "macro_recall": {
+      "pytorch": 0.7895156926406925,
+      "ncnn": 0.7941017316017316,
+      "delta": 0.004586038961039041
+    },
+    "negative_alarm_rate": {
+      "pytorch": 0.0089399744572158,
+      "ncnn": 0.010217113665389528,
+      "delta": 0.0012771392081737283
+    }
+  },
+  "acceptance_checks": {
+    "negative_alarm_rate_at_most_1pct": false,
+    "smoke_recall_drop_at_most_1pp": true,
+    "fire_recall_drop_at_most_1pp": true,
+    "micro_f1_drop_at_most_1pp": true
+  },
+  "cache_path": "/workspace/TFM/artifacts/17_rpi5_deployment_validation/validation/ncnn640_cache/20260916T182255Z_93d24b",
+  "note": "Comprobación de portabilidad; no selecciona modelo ni reajusta umbrales."
+}
