@@ -24,7 +24,7 @@ Para detenerla:
 docker compose down
 ```
 
-No es necesario descargar dependencias manualmente ni disponer de GPU para probar la aplicación. La primera construcción descarga las dependencias y puede tardar varios minutos. El dataset se incluye en el repositorio para reproducibilidad, pero queda excluido del contexto Docker mediante `.dockerignore` para no inflar la imagen de demostración.
+No es necesario descargar dependencias manualmente ni disponer de GPU para probar la aplicación. La primera construcción descarga las dependencias y puede tardar varios minutos. El dataset completo no se incluye en esta entrega para mantener el repositorio manejable; sí se conservan los manifiestos, auditorías y artefactos finales necesarios para auditar el flujo.
 
 ## Verificación automatizada
 
@@ -77,28 +77,25 @@ En Raspberry Pi 5, la variante NCNN a 640 px obtuvo 167,41 ms de latencia media 
 ├── fire_app/                 API, interfaz web y alertas
 ├── artifacts/14_.../         modelo PyTorch final y manifiesto SHA-256
 ├── artifacts/datasets/       manifiestos, auditorías y YAML del dataset preparado
-├── artifacts/runtime_datasets/ dataset preparado materializado para entrenamiento
-├── data/D-Fire/              dataset D-Fire original utilizado
 ├── deployment/               exportaciones y despliegue en Raspberry Pi 5
 ├── notebooks/                11 cuadernos documentados del flujo experimental
 ├── configs/                  contratos de experimentos y aplicación
 ├── tools/                    ejecutores y verificadores reproducibles
 ├── tests/                    pruebas unitarias y funcionales
 ├── results/                  tablas, figuras y resúmenes seleccionados
-├── docs/                     guía de reproducción y mapa de evidencias
 ├── Dockerfile                imagen ligera de demostración
 └── compose.yaml              arranque local de la aplicación
 ```
 
-El orden y propósito de los cuadernos se explica en `notebooks/README.md`. Los resultados completos de cada fase no se duplican en Git: se incluyen únicamente las evidencias finales necesarias para auditar las conclusiones, junto con el dataset y la versión procesada empleada por los entrenamientos.
+El orden y propósito de los cuadernos se explica en `notebooks/README.md`. Los resultados completos de cada fase no se duplican en Git: se incluyen únicamente las evidencias finales necesarias para auditar las conclusiones, junto con los manifiestos de preparación del dataset.
 
 ## Dataset y reproducción experimental
 
-El repositorio incluye el dataset D-Fire original utilizado en `data/D-Fire`. La fuente oficial es <https://github.com/gaia-solutions-on-demand/DFireDataset>. La versión empleada contiene 17.221 imágenes de entrenamiento y 4.306 de test. El notebook `notebooks/01_DFire_preparacion_dataset.ipynb` genera la versión preparada `artifacts/datasets/dfire_seed42_val10_v1`, que contiene el manifiesto único, la partición train/val/test, los ficheros de auditoría y los YAML de datos. La validación se obtiene reservando el 10 % del entrenamiento original mediante estratificación por tipo de imagen y semilla 42.
+El dataset D-Fire original no se redistribuye dentro del repositorio. La fuente oficial es <https://github.com/gaia-solutions-on-demand/DFireDataset>. La versión empleada contiene 17.221 imágenes de entrenamiento y 4.306 de test. Para reproducir la preparación completa, el dataset debe colocarse localmente en `data/D-Fire`.
 
-Además, la estructura YOLO ya materializada para entrenamiento queda incluida en `artifacts/runtime_datasets/dfire_seed42_val10_v1/dataset`, con `images/{train,val,test}` y `labels/{train,val,test}`. Esta copia aplica las reparaciones de anotaciones y las correcciones de JPEG registradas por el notebook 01. Para entrenar directamente sobre esa versión puede usarse `artifacts/datasets/dfire_seed42_val10_v1/data_local.yaml`.
+El notebook `notebooks/01_DFire_preparacion_dataset.ipynb` genera la versión preparada `dfire_seed42_val10_v1`. En `artifacts/datasets/dfire_seed42_val10_v1` se conservan el manifiesto único, la partición train/val/test, los ficheros de auditoría y los YAML de datos. La validación se obtiene reservando el 10 % del entrenamiento original mediante estratificación por tipo de imagen y semilla 42.
 
-La reconstrucción completa de entrenamientos requiere una GPU NVIDIA compatible y se describe en [docs/REPRODUCIBILIDAD.md](docs/REPRODUCIBILIDAD.md). La demostración de la aplicación no necesita GPU.
+La reconstrucción completa de entrenamientos requiere una GPU NVIDIA compatible y el dataset original disponible localmente. La demostración de la aplicación no necesita GPU.
 
 ## Privacidad, alcance y limitaciones
 

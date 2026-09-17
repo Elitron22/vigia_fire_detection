@@ -11,3 +11,8 @@ tmp/
 *.mp4
 data/
 artifacts/runtime_datasets/
+
+# Material auxiliar no necesario para la revisión del repositorio.
+docs/
+results/app_audit/
+$null
