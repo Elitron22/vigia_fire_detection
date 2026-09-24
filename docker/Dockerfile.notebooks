@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1.7
+
+# Entorno para ejecutar los notebooks del TFM (preparación del dataset,
+# entrenamiento y evaluación). Es el mismo entorno usado durante el proyecto.
+# La imagen base se fija por su digest SHA-256 para que no cambie aunque se
+# actualice la etiqueta remota. CUDA 13.0 da soporte a GPU NVIDIA recientes
+# (incluida la serie RTX 50 usada en el TFM).
+ARG PYTORCH_IMAGE=pytorch/pytorch:2.12.1-cuda13.0-cudnn9-runtime@sha256:72f863fa1fe13d5d87a72d00db2c85fb2d43409ee08dd26bc469de4c8a28b427
+FROM ${PYTORCH_IMAGE}
+
+LABEL org.opencontainers.image.title="Vigía - entorno de notebooks" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.description="Entorno para entrenar y evaluar los modelos de detección de humo y fuego del TFM"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    MPLBACKEND=Agg \
+    TFM_PROJECT_ROOT=/workspace/TFM \
+    TFM_DATASET_ROOT=/workspace/TFM/data/D-Fire \
+    YOLO_CONFIG_DIR=/workspace/.config \
+    TORCH_HOME=/workspace/.cache/torch
+
+# OpenCV necesita libGL/libglib aunque las figuras se guarden sin interfaz.
+# tini reenvía correctamente las señales al servidor de Jupyter.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        ffmpeg \
+        libgl1 \
+        libglib2.0-0 \
+        python3-venv \
+        tini \
+    && rm -rf /var/lib/apt/lists/*
+
+# Entorno virtual que reutiliza el PyTorch de la imagen base.
+RUN python -m venv --system-site-packages /opt/tfm-venv
+ENV PATH=/opt/tfm-venv/bin:${PATH}
+
+WORKDIR /workspace/TFM
+
+COPY docker/requirements.txt /tmp/tfm-requirements.txt
+RUN python -m pip install --upgrade pip \
+    && python -m pip install --requirement /tmp/tfm-requirements.txt \
+    && rm /tmp/tfm-requirements.txt
+
+COPY docker/verify_environment.py /usr/local/bin/verify_tfm_environment.py
+RUN mkdir -p /workspace/.config/Ultralytics /workspace/.cache/torch
+RUN python /usr/local/bin/verify_tfm_environment.py --build
+
+EXPOSE 8888
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["python", "-m", "jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--IdentityProvider.token=", "--ServerApp.password=", "--ServerApp.root_dir=/workspace/TFM"]

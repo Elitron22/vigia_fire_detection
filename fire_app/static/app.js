@@ -94,23 +94,27 @@ function showMedia(kind, source, focusResult = false) {
   }
 }
 
-function renderDetections(detections = []) {
+function renderDetectionGroups(groups = {}) {
   const container = $("#detection-summary");
-  if (!detections.length) {
+  if (!Object.keys(groups).length) {
     container.innerHTML = '<p class="muted">No hay detecciones por encima del umbral.</p>';
     return;
   }
+  const labels = { fire: "Fuego", smoke: "Humo" };
+  container.innerHTML = Object.entries(groups).map(([name, value]) =>
+    `<div class="detection-chip ${name}"><span>${labels[name] || name} · ${value.count}</span><strong>${decimal(value.max_confidence * 100, 1)}%</strong></div>`
+  ).join("");
+}
+
+function renderDetections(detections = []) {
   const groups = detections.reduce((result, item) => {
-    const group = result[item.class_name] || { count: 0, max: 0 };
+    const group = result[item.class_name] || { count: 0, max_confidence: 0 };
     group.count += 1;
-    group.max = Math.max(group.max, item.confidence);
+    group.max_confidence = Math.max(group.max_confidence, item.confidence);
     result[item.class_name] = group;
     return result;
   }, {});
-  const labels = { fire: "Fuego", smoke: "Humo" };
-  container.innerHTML = Object.entries(groups).map(([name, value]) =>
-    `<div class="detection-chip ${name}"><span>${labels[name] || name} · ${value.count}</span><strong>${decimal(value.max * 100, 1)}%</strong></div>`
-  ).join("");
+  renderDetectionGroups(groups);
 }
 
 function renderAlertState(snapshot = {}) {
@@ -249,10 +253,16 @@ async function analyzeVideo() {
     const blob = await response.blob();
     if (!blob.type.startsWith("video/")) throw new Error("La API no devolvió un vídeo reproducible.");
     showMedia("video", URL.createObjectURL(blob), true);
-    renderDetections([]);
-    $("#processing-time").textContent = "Incluido en metadatos";
+    const detectionSummary = JSON.parse(response.headers.get("X-TFM-Detection-Summary") || "{}");
+    renderDetectionGroups(detectionSummary);
+    const processingHeader = response.headers.get("X-TFM-Processing-Ms-Per-Frame");
+    const processingMs = Number(processingHeader);
+    $("#processing-time").textContent = processingHeader !== null && Number.isFinite(processingMs)
+      ? `${decimal(processingMs, 0)} ms`
+      : "No disponible";
     $("#run-badge").textContent = response.headers.get("X-TFM-Run-Id") || "Vídeo completado";
-    $("#alert-status").textContent = `${response.headers.get("X-TFM-Event-Count") || 0} eventos`;
+    const eventCount = Number(response.headers.get("X-TFM-Event-Count") || 0);
+    $("#alert-status").textContent = `${eventCount} ${eventCount === 1 ? "evento" : "eventos"}`;
     estimate.textContent = `Procesamiento completado en ${readableDuration((performance.now() - started) / 1000)}.`;
     toast("Vídeo procesado y guardado.");
   } catch (error) {

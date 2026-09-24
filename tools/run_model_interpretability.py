@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 import shutil
 import sys
-import uuid
 
 import cv2
 import matplotlib
@@ -28,7 +27,7 @@ if str(ROOT) not in sys.path:
 
 import tfm_pipeline as pipeline
 from tfm_interpretability import (
-    blur_baseline, deletion_curve, heatmap_mass_inside, mask_tiles, minmax,
+    deletion_curve, heatmap_mass_inside, mask_tiles, minmax,
     multiscale_eigencam, occlusion_sensitivity, pointing_game, predict_arrays,
     result_predictions, select_cases, target_score,
 )

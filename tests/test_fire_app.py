@@ -228,6 +228,11 @@ class ConfigurationAndApiTests(unittest.TestCase):
                 duration_seconds=4.0,
                 events=events,
                 detections_total=10,
+                detections_by_class={
+                    "smoke": {"count": 7, "max_confidence": 0.8},
+                    "fire": {"count": 3, "max_confidence": 0.9},
+                },
+                processing_ms_per_frame=12.5,
                 output_path=str(output_path),
                 media_type="video/mp4",
             )
@@ -244,6 +249,14 @@ class ConfigurationAndApiTests(unittest.TestCase):
                         headers={"X-Filename": "incendio.mp4"},
                     )
             self.assertEqual(response.status_code, 200)
+            self.assertEqual(
+                json.loads(response.headers["X-TFM-Detection-Summary"]),
+                {
+                    "smoke": {"count": 7, "max_confidence": 0.8},
+                    "fire": {"count": 3, "max_confidence": 0.9},
+                },
+            )
+            self.assertEqual(float(response.headers["X-TFM-Processing-Ms-Per-Frame"]), 12.5)
             send.assert_called_once()
             records = EventStore(settings.event_log).recent()
             self.assertEqual(len(records), 2)

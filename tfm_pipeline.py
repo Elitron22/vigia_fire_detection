@@ -28,7 +28,14 @@ DEFAULT_DATASET_VERSION = "dfire_seed42_val10_v1"
 
 
 def project_root() -> Path:
-    """Devuelve la raíz del proyecto en Docker, Colab o Windows local."""
+    """Devuelve la raiz del proyecto.
+
+    Orden de resolucion: TFM_PROJECT_ROOT explicito, rutas conocidas de
+    Docker o Colab y, en su defecto, la carpeta que contiene a este propio
+    fichero (tfm_pipeline.py vive en la raiz del repositorio). Este ultimo
+    caso es el que se aplica al clonar el repositorio en cualquier maquina
+    sin configurar nada mas.
+    """
     configured = os.environ.get("TFM_PROJECT_ROOT")
     if configured:
         return Path(configured).expanduser().resolve()
@@ -38,7 +45,7 @@ def project_root() -> Path:
     colab_root = Path("/content/drive/MyDrive/TFM")
     if colab_root.is_dir():
         return colab_root.resolve()
-    return Path(r"C:\Users\elitr\Documents\UPM Data\TFM").resolve()
+    return Path(__file__).resolve().parent
 
 
 def dataset_root(root: Path | None = None) -> Path:

@@ -1,0 +1,5 @@
+# El código, los notebooks y el dataset se montan como volumen al arrancar;
+# la imagen solo necesita estos dos ficheros para construirse.
+*
+!docker/requirements.txt
+!docker/verify_environment.py

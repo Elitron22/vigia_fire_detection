@@ -60,6 +60,8 @@ class VideoResult:
     duration_seconds: float
     events: list[AlertEvent]
     detections_total: int
+    detections_by_class: dict[str, dict[str, int | float]]
+    processing_ms_per_frame: float
     output_path: str
     media_type: str
 
@@ -188,6 +190,8 @@ def process_video(
     frames_read = 0
     frames_inferred = 0
     detections_total = 0
+    detections_by_class: dict[str, dict[str, int | float]] = {}
+    processing_ms_total = 0.0
     events: list[AlertEvent] = []
     last_annotated: np.ndarray | None = None
     try:
@@ -208,7 +212,20 @@ def process_video(
                 )
                 last_annotated = result.annotated_bgr
                 frames_inferred += 1
+                processing_ms_total += result.processing_ms
                 detections_total += len(result.detections)
+                for detection in result.detections:
+                    class_name = str(detection["class_name"])
+                    confidence_value = float(detection["confidence"])
+                    class_summary = detections_by_class.setdefault(
+                        class_name,
+                        {"count": 0, "max_confidence": 0.0},
+                    )
+                    class_summary["count"] = int(class_summary["count"]) + 1
+                    class_summary["max_confidence"] = max(
+                        float(class_summary["max_confidence"]),
+                        confidence_value,
+                    )
                 new_events = alert_engine.update(timestamp, result.detections)
                 events.extend(new_events)
                 if on_event:
@@ -271,6 +288,10 @@ def process_video(
         duration_seconds=frames_read / fps,
         events=events,
         detections_total=detections_total,
+        detections_by_class=detections_by_class,
+        processing_ms_per_frame=(
+            processing_ms_total / frames_inferred if frames_inferred else 0.0
+        ),
         output_path=str(actual_output),
         media_type=media_type,
     )

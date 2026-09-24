@@ -1,201 +1,239 @@
-# Flujo reproducible de notebooks del TFM
+# Notebooks del TFM
 
-Los notebooks de esta carpeta sustituyen la ejecución monolítica del baseline.
-El material histórico y los análisis descartados no forman parte de la carpeta
-de entrega; aquí se conservan únicamente los cuadernos necesarios para explicar
-o demostrar el flujo final.
+Estos notebooks recogen todo el proceso experimental del TFM: preparación del
+dataset, entrenamiento de los modelos, comparación de resoluciones y umbrales,
+selección del modelo final, evaluación en test e interpretabilidad.
 
-## Cómo leer esta carpeta
+Todos están guardados con sus resultados (tablas, gráficas y mensajes), así que
+**se pueden leer en GitHub o en Jupyter sin ejecutar nada**.
 
-- Cada notebook comienza con una **Guía de lectura y ejecución** que explica su
-  finalidad, requisitos, entradas, salidas y relación con el resto del flujo.
-- Los números forman parte de la trazabilidad histórica; el salto del 03 al 05
-  es intencionado. El antiguo notebook 04 de auditoría perceptual de escenas se
-  retiró porque no intervino en el modelo ni en las conclusiones finales y el
-  dataset no ofrece identificadores fiables de cámara, vídeo o evento.
-- El flujo formal está formado por 01, 02, 03, 05, 06, 08, 09, 10, 11 y 12.
-  El notebook 07 es una demostración opcional para imagen y vídeo.
-- Los modos de entrenamiento o evaluación costosa están desactivados por
-  defecto. Los cuadernos de resultados se pueden leer sin volver a entrenar.
+## Antes de ejecutarlos
 
-## Orden de ejecución
+Por su tamaño, el repositorio no incluye los resultados intermedios de cada
+fase: los modelos entrenados de cada experimento (`artifacts/experiments/`),
+las predicciones guardadas ni las carpetas de resultados de cada análisis. Solo
+incluye:
 
-1. `01_DFire_preparacion_dataset.ipynb`
-   - Activa `RUN_PREPARATION=True` únicamente al crear una nueva versión.
-   - Produce `artifacts/datasets/dfire_seed42_val10_v1`.
-2. `02_DFire_entrenamiento_modelos.ipynb`
-   - Para un solo modelo, selecciona `MODEL_KEY` y deja `TRAINING_QUEUE=[]`.
-   - Para varios, añade un diccionario por experimento a `TRAINING_QUEUE`; se
-     ejecutan secuencialmente al activar `RUN_TRAINING=True`.
-   - Registra cada ejecución en `artifacts/experiments/<experiment_id>`.
-   - Libera la memoria de GPU entre trabajos y conserva los fallos con estado
-     `failed`. `CONTINUE_ON_ERROR` decide si la cola prosigue tras un fallo.
-3. `03_DFire_evaluacion_modelos.ipynb`
-   - Selecciona un experimento completo.
-   - Trabaja por defecto en `val`: métricas estándar de Ultralytics y errores a
-     confianza fija 0,25. Permite consultar resultados guardados.
-   - El selector `test` se reserva para la configuración final congelada.
-5. `05_DFire_barrido_umbrales.ipynb`
-   - Continúa la comparación del notebook 03 con los tres finalistas.
-   - Muestra 21 umbrales, escenarios de alarmas del 1 %, 2 % y 5 %, métricas por
-     clase, tamaño de cajas y revisión dirigida de errores.
-   - Arranca en consulta (`RUN_SWEEP=False`): muestra la última ejecución
-     completa. Puede fijarse `RUN_ID` para presentar una ejecución concreta.
-   - Los escenarios no fijan automáticamente el umbral de despliegue.
-6. `06_DFire_comparacion_resolucion.ipynb`
-   - Compara YOLOv8s entrenado a 640, 768 y 1024 mediante una cuadrícula 3×3 de
-     resolución de entrenamiento e inferencia, siempre sobre validación.
-   - Mide métricas estándar, punto operativo con ≤2 % de negativas con alarma,
-     recall por tamaño, cambios emparejados, desglose de errores y coste de cómputo.
-   - Arranca en consulta (`RUN_COMPARISON=False`) y carga artefactos verificados.
-7. `07_DFire_pruebas_manual_inferencia.ipynb`
-   - Aplica un checkpoint registrado o unos pesos indicados a una imagen o vídeo
-     externo, mediante ruta o selector de subida en Jupyter.
-   - Los vídeos anotados se guardan como WebM/VP8 y se incrustan en la salida
-     para que el reproductor funcione también desde el frontend de Jupyter.
-   - Guarda el resultado anotado y su configuración en
-     `artifacts/07_manual_inference/`; no entrena ni utiliza `test`.
-8. `08_DFire_optimizacion_hiperparametros_YOLO26s.ipynb`
-   - Ejecuta un cribado multifidelidad de YOLO26s a 768: compara las primeras 50
-     épocas del baseline con cuatro ensayos de 50 épocas sobre `lr0`,
-     `weight_decay`, aumentos moderados y la combinación `lr0` + aumentos.
-   - La cola nocturna se estima en unas 9,4 h, puede reanudar interrupciones y
-     conserva la misma semilla durante el cribado.
-   - Una segunda fase entrena desde cero la receta elegida durante 100 épocas.
-     Ambas fases arrancan desactivadas y mantienen el test cerrado.
-   - `RUN_EVALUATION=True` ejecuta el evaluador automático: selecciona dos
-     candidatos, barre umbrales separados y genera tablas, figuras y resumen.
-9. `09_DFire_seleccion_final_validacion.ipynb`
-   - Cierra la comparación YOLO26s 768→768 frente a YOLOv8s 768→640 sobre las
-     1.721 imágenes del split de validación congelado.
-   - Presenta métricas globales, por clase y por tamaño, umbrales separados,
-     falsos positivos/negativos y evidencia emparejada.
-   - Exige como máximo un 1 % de imágenes negativas con alarma y selecciona un
-     único checkpoint previo a test. No ejecuta inferencia sobre test.
-10. `10_DFire_comparacion_todos_modelos_1pct.ipynb`
-   - Repite el protocolo final del 1 % para las 14 configuraciones completas de
-     arquitectura y resolución ya estudiadas.
-   - Presenta por separado los cuatro ensayos de hiperparámetros de 50 épocas,
-     que no compiten directamente con los entrenamientos completos.
-   - Incluye rankings de máxima sensibilidad y máximo F1, métricas por clase y
-     tamaño, y deja explícito el intercambio entre recall macro y recall de fuego.
-   - Reutiliza cachés verificadas, mantiene test bloqueado y reproduce los dos
-     puntos operativos del notebook 09.
-11. `11_DFire_evaluacion_final_test.ipynb`
-   - Presenta la única evaluación final del YOLO26s 768→768 congelado, con
-     umbrales humo 0,36 y fuego 0,16.
-   - Incluye métricas estándar y operativas, desglose por clase y tamaño,
-     matriz de errores, alarmas negativas, ejemplos y comparación con validación.
-   - Es de solo consulta: no contiene mecanismos para reevaluar, buscar umbrales
-     ni seleccionar otro modelo usando test.
-12. `12_DFire_interpretabilidad_modelo.ipynb`
-   - Explica el YOLO26s final mediante Eigen-CAM multiescala y sensibilidad por
-     oclusión sobre aciertos, falsas alarmas y omisiones de humo y fuego.
-   - Incluye una prueba de eliminación frente a regiones aleatorias, mapas
-     serializados, limitaciones y lectura responsable de seis casos dirigidos.
-   - Usa exclusivamente validación; no consulta test ni modifica el modelo o los
-     umbrales congelados.
+- La partición y las correcciones del dataset preparado
+  (`artifacts/datasets/dfire_seed42_val10_v1/`).
+- El modelo final (`artifacts/14_final_model_freeze/final/`).
+- Las tablas y figuras finales de test, interpretabilidad y Raspberry Pi (`results/`).
 
-Flujo principal: **01 → 02 → 03 → 05 → 06 → 09 → 10 → congelado → 11 (test final) → 12 (interpretabilidad sobre val)**.
+Por eso hay dos formas de usar los notebooks:
 
-El notebook 07 es una utilidad cualitativa para demostraciones y pruebas
-manuales; no forma parte de la selección formal de modelo ni de umbral.
+- **Leerlos**: basta con abrirlos. Es la forma de revisar cómo se obtuvo cada
+  tabla y figura de la memoria.
+- **Ejecutarlos de nuevo**: hay que seguir el orden de la tabla de abajo desde
+  el principio, con el dataset D-Fire descargado y una GPU, porque cada notebook
+  usa lo que generan los anteriores. Entrenar todos los modelos lleva muchas
+  horas. Si se ejecuta un notebook de análisis sin haber generado antes sus
+  datos de entrada, fallará al no encontrarlos en `artifacts/`.
 
-El notebook 08 es un experimento posterior y dirigido. No sustituye la
-comparación controlada de arquitecturas: documenta una búsqueda manual acotada
-y debe informar únicamente de las ejecuciones realmente realizadas.
+## Entorno
 
-El notebook 09 documenta la comparación final inicial entre dos candidatos. El
-notebook 10 amplía el mismo criterio del 1 % al inventario completo antes de
-congelar definitivamente el modelo. Ninguno consulta el conjunto de test.
-
-## Mantener la documentación de los cuadernos
-
-Si se reconstruye alguno mediante los generadores de `tools/`, se debe volver a
-aplicar la guía homogénea de entrega y validar el inventario:
+La forma más sencilla de ejecutarlos es el entorno Docker de notebooks, descrito
+en la sección 4 del `README.md` principal. Desde la raíz del repositorio:
 
 ```bash
-python tools/document_delivery_notebooks.py
-python tests/verify_pipeline_artifacts.py
+docker compose -f compose.notebooks.yaml -f compose.gpu.yaml up -d --build
 ```
 
-El primer comando solo añade o actualiza celdas Markdown; conserva el código,
-los metadatos y las salidas existentes.
+y abrir <http://127.0.0.1:8888/lab>. El dataset debe estar en `data/D-Fire`
+(sección 3 del `README.md` principal).
 
-## Barrido inicial y revisión de errores
+Los comandos de `tools/` que aparecen en esta guía se lanzan desde la raíz del
+repositorio, en una terminal de Jupyter Lab o con:
 
-La configuración está en `configs/threshold_sweep.yaml`. Fija explícitamente los
-identificadores de los tres experimentos para no elegir otro entrenamiento por
-accidente. Se genera una inferencia a confianza 0,01 por modelo, con las mismas
-1.721 imágenes de validación y el protocolo operativo del notebook 03.
+```bash
+docker compose -f compose.notebooks.yaml exec notebook python tools/<script>.py
+```
+
+## Cómo funcionan
+
+- Cada notebook empieza con una **Guía de lectura y ejecución**: para qué
+  sirve, qué necesita, qué genera y qué notebook va después.
+- Al principio de cada notebook hay unas variables que activan las partes
+  costosas (entrenar, evaluar, calcular). **Todas están desactivadas por
+  defecto**, así que ejecutar el notebook completo no entrena ni recalcula
+  nada: solo muestra los resultados ya guardados en `artifacts/`.
+- El conjunto de **test** no se usa hasta el notebook 11. Todas las decisiones
+  (modelo, resolución y umbrales) se toman con la partición de validación.
+- Los números siguen el orden en que se hizo el trabajo. No hay notebook 04: era
+  un análisis de escenas parecidas que se descartó porque D-Fire no indica de
+  qué cámara o vídeo sale cada imagen, y no influyó en el resultado final.
+
+## Orden y contenido
+
+| Notebook | Qué hace | Variables para ejecutar | Sección de la memoria |
+|---|---|---|---|
+| 01 | Prepara el dataset | `RUN_PREPARATION` | 3 |
+| 02 | Entrena los modelos | `RUN_TRAINING` | 4.1 |
+| 03 | Evalúa cada modelo en validación | `RUN_STANDARD_EVALUATION`, `RUN_ERROR_ANALYSIS` | 4.1 |
+| 05 | Barrido de umbrales de confianza | `RUN_SWEEP` | 4.2 |
+| 06 | Comparación de resoluciones | `RUN_COMPARISON` | 4.2 |
+| 07 | (Opcional) Prueba manual con una imagen o vídeo | — | — |
+| 08 | Ajuste de hiperparámetros de YOLO26s | `RUN_TRAINING`, `RUN_EVALUATION` | 4.4 |
+| 09 | Selección final en validación | `RUN_SELECTION` | 4.3 y 4.5 |
+| 10 | Comprobación con todas las configuraciones | — (script) | 4.5 |
+| 11 | Evaluación final en test | — (script) | 5 |
+| 12 | Interpretabilidad | `RUN_ANALYSIS` | 6 |
+
+### 01 · Preparación del dataset
+
+Lee el dataset original de `data/D-Fire` sin modificarlo, comprueba que todas
+las imágenes y anotaciones se pueden leer, corrige cajas que se salen de la
+imagen o no tienen tamaño, busca imágenes repetidas entre particiones y aparta
+el 10 % del entrenamiento como validación (semilla 42). Resultado: 15.500
+imágenes de entrenamiento, 1.721 de validación y 4.306 de test.
+
+Genera `artifacts/datasets/dfire_seed42_val10_v1/`, que ya está incluida en el
+repositorio. Solo hace falta activar `RUN_PREPARATION=True` para volver a
+crearla.
+
+### 02 · Entrenamiento
+
+Entrena un modelo o una cola de modelos:
+
+- `MODEL_KEY`: modelo a entrenar (`yolov8n`, `yolov8s`, `yolo26n` o `yolo26s`).
+- `TRAINING_PROFILE`: configuración de entrenamiento (`controlled` a 640 px,
+  `controlled_768` o `controlled_1024`). Viene preparado con `yolo26s` y
+  `controlled_768`, que es la configuración del modelo final.
+- `TRAINING_QUEUE`: lista de entrenamientos para lanzarlos uno detrás de otro.
+- `RUN_TRAINING=True`: lanza el entrenamiento.
+
+Todos los modelos comparten los mismos hiperparámetros: 100 épocas, batch 16,
+AdamW con tasa de aprendizaje inicial 0,001 y parada temprana tras 20 épocas
+sin mejora. Cada entrenamiento se guarda en `artifacts/experiments/<id>/`.
+Los perfiles y modelos están definidos en `configs/model_registry.yaml`.
+
+### 03 · Evaluación en validación
+
+Calcula las métricas estándar (precisión, recall, mAP) de un experimento y
+analiza sus errores con un umbral de confianza de 0,25. Se elige el experimento
+con `MODEL_KEY` o `EXPERIMENT_ID`. Para evaluar varios experimentos de una vez:
+`tools/run_validation_evaluations.py`.
+
+### 05 · Barrido de umbrales
+
+Prueba 21 umbrales de confianza en los modelos finalistas y mide, para cada
+uno, el recall y la proporción de imágenes sin humo ni fuego con alarma.
+También revisa los errores más habituales. Se ejecuta con `RUN_SWEEP=True` o con:
 
 ```bash
 python tools/run_threshold_sweep.py
-python tools/run_threshold_sweep.py --offline
-```
-
-El primer comando reutiliza cachés válidas o genera las que faltan con GPU; el
-segundo exige que todas existan. No se vuelve a entrenar. Cada nuevo barrido
-genera una carpeta en `artifacts/05_threshold_sweep/validation/<run_id>`.
-`latest.json` apunta únicamente a una ejecución completa. Los intentos
-interrumpidos permanecen identificados como `incomplete` y no se presentan.
-
-Las predicciones se guardan en `evaluation/val/threshold_cache` de cada
-experimento, separadas de `error_analysis` para no sustituir el diagnóstico a
-0,25. La caché verifica pesos, manifiesto, código de inferencia, parámetros y
-versiones. El barrido debe reproducir el punto histórico 0,25 por imagen.
-
-Los gráficos se exportan a PNG y SVG; las tablas completas y copias de código
-permiten auditar las cifras. Las observaciones visuales son una revisión
-dirigida, no un etiquetado exhaustivo ni una corrección de las anotaciones.
-
-Para comprobar el cálculo y reconstruir únicamente el notebook 05:
-
-```bash
-python -m unittest discover -s tests -p test_tfm_thresholds.py
 python tools/verify_threshold_sweep.py
-python tools/build_threshold_notebook.py
 ```
 
-El generador conserva las celdas y salidas del notebook 03 y añade un enlace al
-05. Reconstruir el 05 elimina sus salidas; después debe ejecutarse de arriba a
-abajo en modo consulta y guardarse para la presentación.
+Configuración: `configs/threshold_sweep.yaml`. Resultados:
+`artifacts/05_threshold_sweep/`.
 
-## Comparación controlada de resolución
+### 06 · Comparación de resoluciones
 
-La configuración está en `configs/resolution_comparison.yaml`. El análisis usa
-las mismas 1.721 imágenes para las nueve combinaciones
-`entrenamiento 640/768/1024 × evaluación 640/768/1024`. No consulta test.
+Compara YOLOv8s entrenado a 640, 768 y 1024 px, evaluando cada uno a las tres
+resoluciones (nueve combinaciones), con un máximo del 2 % de imágenes sin humo
+ni fuego con alarma. Incluye el coste de cálculo de cada resolución.
 
 ```bash
 python tools/run_resolution_comparison.py
 python tools/verify_resolution_comparison.py
-python tools/build_resolution_notebook.py
 ```
 
-Las predicciones y validaciones estándar se guardan en las cachés verificadas de
-cada experimento. Cada comparación crea una carpeta inmutable en
-`artifacts/06_resolution_comparison/validation/<run_id>` y exporta tablas, código,
-gráficos PNG/SVG y una galería de cambios.
+Configuración: `configs/resolution_comparison.yaml`. Resultados:
+`artifacts/06_resolution_comparison/`.
 
-## Modelos
+### 07 · Prueba manual (opcional)
 
-El registro está en `configs/model_registry.yaml`. Inicialmente contiene
-`yolov8n`, `yolov8s`, `yolo26n` y `yolo26s`. Para añadir otro modelo compatible con
-Ultralytics se crea otra entrada en ese archivo; no hay que duplicar notebooks.
+Aplica un modelo a una imagen o vídeo cualquiera y muestra el resultado
+anotado. No interviene en ninguna decisión del TFM. Para usarlo con el modelo
+final incluido en el repositorio, cambiar en la celda de parámetros:
 
-El perfil `controlled` fija el mismo protocolo base para todos los modelos. Los
-ajustes propios de una arquitectura deben guardarse como experimentos distintos.
+```python
+WEIGHTS_PATH = "artifacts/14_final_model_freeze/final/weights/best.pt"
+IMGSZ = 768
+INPUT_PATH = "ruta/a/mi_imagen.jpg"
+```
 
-## Seguridad y reproducibilidad
+Los resultados se guardan en `artifacts/07_manual_inference/`.
 
-- Los notebooks arrancan en modo no destructivo: no entrenan ni evalúan por
-  defecto.
-- El dataset original no se modifica.
-- El test no se importa en el notebook de entrenamiento.
-- Las rutas se reconstruyen para Docker, Windows o Colab.
-- Al comenzar el primer entrenamiento, la vista corregida se copia una sola vez
-  al volumen Docker rápido `/workspace/.cache/tfm-datasets`. Los experimentos
-  posteriores reutilizan esa copia y evitan la lectura lenta del volumen Windows.
-- El baseline YOLOv8s ya entrenado está registrado como
-  `legacy_yolov8s_baseline`, sin copiar sus pesos.
+### 08 · Ajuste de hiperparámetros de YOLO26s
+
+Prueba cuatro cambios de hiperparámetros (tasa de aprendizaje, weight decay,
+aumento de datos más suave y la combinación de ambos) entrenando 50 épocas cada
+uno, y los compara con las primeras 50 épocas del entrenamiento de referencia.
+
+- `RUN_TRAINING=True`: lanza los cuatro entrenamientos (unas 9,4 horas en
+  total; si se interrumpe, se puede reanudar).
+- `RUN_EVALUATION=True`: evalúa los cuatro ensayos (o
+  `tools/run_hyperparameter_evaluation.py`).
+
+Ninguno mejoró de forma clara al modelo de referencia, que es el que se
+mantuvo. Configuración: `configs/yolo26s_hyperparameter_search.yaml`.
+
+### 09 · Selección final en validación
+
+Compara los dos candidatos finales, YOLO26s (entrenado y evaluado a 768 px) y
+YOLOv8s (entrenado a 768 px y evaluado a 640 px), con umbrales distintos para
+humo y fuego y un máximo del 1 % de imágenes sin humo ni fuego con alarma.
+Elige YOLO26s con umbrales 0,36 para humo y 0,16 para fuego. Usa también la
+comparación de arquitecturas a 768 px y la revisión de falsos positivos por
+clase:
+
+```bash
+python tools/run_architecture_768_comparison.py
+python tools/run_class_threshold_and_fp_review.py
+python tools/run_final_validation_selection.py
+```
+
+Cada script tiene su `verify_*.py` correspondiente en `tools/` y su
+configuración en `configs/`.
+
+### 10 · Comprobación con todas las configuraciones
+
+Aplica el mismo criterio del 1 % a las 14 combinaciones de modelo y resolución
+entrenadas, y muestra aparte los cuatro ensayos de hiperparámetros. Sirve para
+comprobar que la elección no dependía de haber comparado solo dos candidatos.
+
+```bash
+python tools/run_all_models_01pct_comparison.py
+python tools/verify_all_models_01pct_comparison.py
+```
+
+Tras este paso, el modelo y sus umbrales se congelaron con
+`tools/freeze_final_model.py`, que genera `artifacts/14_final_model_freeze/`
+(incluida en el repositorio).
+
+### 11 · Evaluación final en test
+
+Muestra la única evaluación del modelo congelado sobre las 4.306 imágenes de
+test. Es de solo lectura: no permite cambiar el modelo ni buscar otros
+umbrales. La evaluación se hizo una vez con:
+
+```bash
+python tools/run_final_test_evaluation.py
+python tools/verify_final_test_evaluation.py
+```
+
+Configuración: `configs/final_test_evaluation.yaml`. Las tablas y figuras
+finales están copiadas en `results/final_test/`.
+
+### 12 · Interpretabilidad
+
+Analiza seis casos de validación (un acierto, una falsa alarma y un fallo de
+detección por clase) con Eigen-CAM, oclusión y una prueba de eliminación de
+regiones. Se ejecuta con `RUN_ANALYSIS=True` o con
+`tools/run_model_interpretability.py`. Las figuras y tablas están en
+`results/interpretability/`.
+
+## Mantener la documentación de los notebooks
+
+Los notebooks se generaron con los scripts `tools/build_*.py`. Reconstruir un
+notebook con ellos borra sus resultados guardados, así que después hay que
+ejecutarlo de nuevo. La guía de lectura del principio de cada notebook se añade
+o actualiza con:
+
+```bash
+python tools/document_delivery_notebooks.py
+```
+
+Este comando solo modifica esas celdas de texto; no toca el código ni los
+resultados.

@@ -13,7 +13,6 @@ import datetime as dt
 import hashlib
 import json
 import math
-import os
 import random
 import shutil
 import sys
@@ -595,7 +594,6 @@ def build_figures(
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib.ticker import PercentFormatter
 
     figures = output / "figures"
     figures.mkdir(parents=True, exist_ok=True)

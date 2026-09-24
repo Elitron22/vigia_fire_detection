@@ -5,11 +5,10 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 
-import numpy as np
 import pandas as pd
 
 from tfm_evaluation import (box_iou, image_error_record, iter_bounded_predictions,
-                            match_detections, preflight_manifest, read_ground_truth,
+                            match_detections, read_ground_truth,
                             run_error_analysis, split_artifact_paths,
                             summarize_errors)
 

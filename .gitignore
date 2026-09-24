@@ -16,3 +16,12 @@ artifacts/runtime_datasets/
 docs/
 results/app_audit/
 $null
+
+# Instalación en Raspberry Pi (ver deployment/README.md)
+.env.telegram
+.venv-rpi5*/
+/model/
+dist/
+
+# Resultados de la aplicación ejecutada sin Docker
+artifacts/08_detection_app*/

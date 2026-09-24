@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 
 import nbformat
-import pandas as pd
 from IPython.core.inputtransformer2 import TransformerManager
 
 ROOT = Path(__file__).resolve().parents[1]

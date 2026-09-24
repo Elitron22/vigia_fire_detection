@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
 
 from .alerting import AlertEvent, EventStore, TemporalAlertEngine
-from .config import ROOT, AlertSettings, AppSettings, load_settings
+from .config import ROOT, AppSettings, load_settings
 from .inference import ModelManager, decode_image, encode_jpeg, process_video
 from .model_registry import ModelRegistry, RegisteredModel
 from .telegram import TelegramNotifier
@@ -393,7 +393,16 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
             final_video,
             media_type=summary.media_type,
             filename=f"{Path(source_name).stem}_detectado{final_video.suffix}",
-            headers={"X-TFM-Run-Id": run_id, "X-TFM-Event-Count": str(len(summary.events))},
+            headers={
+                "X-TFM-Run-Id": run_id,
+                "X-TFM-Event-Count": str(len(summary.events)),
+                "X-TFM-Detection-Summary": json.dumps(
+                    summary.detections_by_class,
+                    ensure_ascii=True,
+                    separators=(",", ":"),
+                ),
+                "X-TFM-Processing-Ms-Per-Frame": f"{summary.processing_ms_per_frame:.3f}",
+            },
         )
 
     @app.websocket("/api/live")

@@ -1,0 +1,29 @@
+# Entorno de notebooks (Jupyter Lab) para reproducir los experimentos.
+# Sin GPU:  docker compose -f compose.notebooks.yaml up -d --build
+# Con GPU:  docker compose -f compose.notebooks.yaml -f compose.gpu.yaml up -d --build
+name: vigia-notebooks
+
+services:
+  notebook:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.notebooks
+    image: vigia-notebooks:1.0.0
+    container_name: vigia-notebooks
+    working_dir: /workspace/TFM
+    shm_size: "8gb"
+    ports:
+      - "127.0.0.1:8888:8888"
+    environment:
+      TFM_PROJECT_ROOT: /workspace/TFM
+      TFM_DATASET_ROOT: /workspace/TFM/data/D-Fire
+      TFM_FAST_DATA_ROOT: /workspace/.cache/tfm-datasets
+    volumes:
+      - .:/workspace/TFM
+      - tfm-cache:/workspace/.cache
+      - tfm-ultralytics-config:/workspace/.config/Ultralytics
+    restart: "no"
+
+volumes:
+  tfm-cache:
+  tfm-ultralytics-config:

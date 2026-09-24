@@ -339,7 +339,7 @@ def build_figures(metrics, scenarios, sizes, gt_details, detection_details, conf
         for diagnostic, label, color, hatch in (("persists_at_floor", "Persiste a 0,01", "#275D8C", ""),
                                                ("recovered_at_floor", "Recuperada al bajar a 0,01", "#D18B46", "//")):
             values = counts.get(diagnostic, pd.Series(0, index=models)).to_numpy()
-            bars = ax.bar(np.arange(len(models)), values, bottom=bottom, color=color, label=label, hatch=hatch)
+            ax.bar(np.arange(len(models)), values, bottom=bottom, color=color, label=label, hatch=hatch)
             for i, value in enumerate(values):
                 if value:
                     ax.text(i, bottom[i] + value / 2, str(int(value)), ha="center", va="center",

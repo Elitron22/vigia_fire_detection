@@ -10,12 +10,10 @@ from pathlib import Path
 import shutil
 import sys
 import traceback
-import uuid
 
 import numpy as np
 import pandas as pd
 import torch
-import yaml
 from PIL import Image, ImageDraw, ImageFont
 from ultralytics import YOLO
 
@@ -25,7 +23,7 @@ if str(ROOT) not in sys.path:
 
 import tfm_pipeline as pipeline
 from tfm_evaluation import (
-    CLASS_NAMES, box_iou, image_error_record, match_detections, model_is_end_to_end,
+    CLASS_NAMES, box_iou, image_error_record, match_detections,
     run_error_analysis, split_artifact_paths, summarize_errors,
 )
 from tfm_thresholds import area_fraction, fp_reason, size_band
@@ -301,7 +299,7 @@ def build_figures(output: Path, standard_comparison: pd.DataFrame, global_compar
     fig.savefig(path, dpi=180, bbox_inches="tight"); plt.close(fig); paths.append(path)
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5.2))
-    image = axes[0].imshow(confusion.to_numpy(), cmap="Blues")
+    axes[0].imshow(confusion.to_numpy(), cmap="Blues")
     for i in range(3):
         for j in range(3): axes[0].text(j, i, str(int(confusion.iloc[i, j])), ha="center", va="center")
     axes[0].set_xticks(range(3), ["Humo", "Fuego", "Fondo"])

@@ -65,7 +65,7 @@ def verify(output: Path | None = None) -> Path:
     sizes = pd.read_csv(output / "test_size_metrics.csv")
     images = pd.read_csv(output / "test_image_metrics.csv")
     gt = pd.read_csv(output / "test_ground_truth_details.csv")
-    detections = pd.read_csv(output / "test_detection_details.csv")
+    pd.read_csv(output / "test_detection_details.csv")  # comprueba que el fichero existe y es legible
     confusion = pd.read_csv(output / "test_confusion_matrix.csv", index_col=0)
     if len(standard) != 3 or set(standard.scope) != {"all_macro", "smoke", "fire"}:
         raise AssertionError("Métricas estándar incompletas")

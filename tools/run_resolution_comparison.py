@@ -445,7 +445,7 @@ def build_figures(metrics, scenarios, standard, size_metrics, image_detection, c
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.8))
     image_matrix = image_detection.pivot(index="trained_imgsz", columns="eval_imgsz", values="fire_image_recall").sort_index().sort_index(axis=1)
     for ax, matrix, title in ((axes[0], std_fire, "mAP50-95 de fuego"), (axes[1], image_matrix, "Recall de imágenes con fuego")):
-        shown = ax.imshow(matrix.values, cmap="Blues", vmin=0, vmax=1)
+        ax.imshow(matrix.values, cmap="Blues", vmin=0, vmax=1)
         for i in range(matrix.shape[0]):
             for j in range(matrix.shape[1]):
                 ax.text(j, i, f"{matrix.iloc[i, j]:.1%}", ha="center", va="center",

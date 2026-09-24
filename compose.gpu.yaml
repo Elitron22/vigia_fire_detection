@@ -1,0 +1,5 @@
+# Da acceso a todas las GPU NVIDIA al servicio de notebooks.
+# Se usa junto a compose.notebooks.yaml (ver README).
+services:
+  notebook:
+    gpus: all
