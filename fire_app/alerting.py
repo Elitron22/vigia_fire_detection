@@ -89,7 +89,12 @@ class TemporalAlertEngine:
 
             if present:
                 last_seen = data["last_seen"]
-                if state == "pending" and last_seen is not None and timestamp - float(last_seen) > self.settings.maximum_gap_seconds:
+                # Solo se reinicia la confirmación si entre medias hubo algún
+                # fotograma sin la clase. Dos fotogramas seguidos con detección
+                # no son una interrupción aunque estén separados por más de
+                # maximum_gap_seconds (cámara en directo con inferencia lenta).
+                interrupted = data["absent_since"] is not None
+                if state == "pending" and interrupted and last_seen is not None and timestamp - float(last_seen) > self.settings.maximum_gap_seconds:
                     data["pending_since"] = timestamp
                     data["max_confidence"] = confidence
                 data["last_seen"] = timestamp
@@ -110,7 +115,9 @@ class TemporalAlertEngine:
             if state == "pending":
                 last_seen = data["last_seen"]
                 if last_seen is None or timestamp - float(last_seen) > self.settings.maximum_gap_seconds:
-                    data.update(state="idle", pending_since=None, last_seen=None, max_confidence=0.0)
+                    data.update(state="idle", pending_since=None, last_seen=None, absent_since=None, max_confidence=0.0)
+                elif data["absent_since"] is None:
+                    data["absent_since"] = timestamp
             elif state == "active":
                 if data["absent_since"] is None:
                     data["absent_since"] = timestamp
@@ -125,6 +132,9 @@ class TemporalAlertEngine:
                         max_confidence=0.0,
                         cooldown_until=timestamp + self.settings.cooldown_seconds,
                     )
+        # Si humo y fuego se confirman a la vez, el fuego va primero: así es el
+        # que se notifica cuando solo se permite un aviso por fuente.
+        events.sort(key=lambda event: event.class_name != "fire")
         return events
 
     def snapshot(self) -> dict[str, dict[str, float | str | None]]:

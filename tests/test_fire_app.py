@@ -64,6 +64,20 @@ class TemporalAlertEngineTests(unittest.TestCase):
         engine.update(6.5, [])
         self.assertEqual(engine.snapshot()["fire"]["state"], "idle")
 
+    def test_slow_frames_with_continuous_presence_trigger(self) -> None:
+        # Cámara en directo con ~1 s por fotograma: la presencia es continua
+        # aunque cada salto supere maximum_gap_seconds.
+        engine = TemporalAlertEngine(self.settings, "test")
+        self.assertEqual(engine.update(0.0, [detection("fire", 0.8)]), [])
+        self.assertEqual(engine.update(1.0, [detection("fire", 0.8)]), [])
+        events = engine.update(2.0, [detection("fire", 0.8)])
+        self.assertEqual([(event.event_type, event.class_name) for event in events], [("triggered", "fire")])
+
+    def test_fire_is_reported_first_when_both_classes_trigger(self) -> None:
+        engine = TemporalAlertEngine(replace(self.settings, hold_seconds=0.0), "test")
+        events = engine.update(0.0, [detection("smoke", 0.9), detection("fire", 0.9)])
+        self.assertEqual([event.class_name for event in events], ["fire", "smoke"])
+
     def test_class_threshold_is_applied(self) -> None:
         engine = TemporalAlertEngine(replace(self.settings, hold_seconds=0.0), "test")
         self.assertEqual(engine.update(0.0, [detection("fire", 0.39)]), [])

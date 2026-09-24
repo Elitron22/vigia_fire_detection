@@ -85,7 +85,8 @@ print(f"Ultralytics: {ultralytics.__version__} · OpenCV: {cv2.__version__}")
                 "imgsz_entrenamiento": descriptor.get("train_config", {}).get("imgsz", "histórico"),
                 "pesos": str(weights_path),
             })
-    return pd.DataFrame(rows).sort_values(["estado", "experiment_id"]).reset_index(drop=True)
+    columns = ["experiment_id", "modelo", "estado", "imgsz_entrenamiento", "pesos"]
+    return pd.DataFrame(rows, columns=columns).sort_values(["estado", "experiment_id"]).reset_index(drop=True)
 
 AVAILABLE_MODELS = discover_models()
 display(AVAILABLE_MODELS[["experiment_id", "modelo", "estado", "imgsz_entrenamiento"]])
@@ -105,14 +106,14 @@ Cambiarlo a `0` cuando la GPU esté libre. El valor de `CONF` es un filtro de
 confianza para la demostración; debe elegirse aparte para un despliegue real.
 """),
         code('''# Parámetros editables
-EXPERIMENT_ID = "legacy_yolov8s_baseline"  # Debe aparecer en la tabla anterior.
-WEIGHTS_PATH = None  # Alternativa: "weights/mis_pesos.pt". Tiene prioridad sobre EXPERIMENT_ID.
+EXPERIMENT_ID = None  # Solo se usa si WEIGHTS_PATH es None; debe aparecer en la tabla anterior.
+WEIGHTS_PATH = "artifacts/14_final_model_freeze/final/weights/best.pt"  # Modelo final del TFM. Tiene prioridad sobre EXPERIMENT_ID.
 INPUT_PATH = os.environ.get("TFM_MANUAL_INPUT") or None
 # Ejemplo: "manual_inputs/mi_imagen.jpg". La variable TFM_MANUAL_INPUT permite automatizar pruebas.
 
 CONF = 0.25
 IOU = 0.70
-IMGSZ = 640
+IMGSZ = 768
 DEVICE = "cpu"      # Usar 0 solo cuando no haya otro entrenamiento en la GPU.
 VID_STRIDE = 1       # 1 procesa todos los fotogramas; 2 procesa uno de cada dos.
 MAX_FRAMES = (

@@ -6,4 +6,6 @@ pillow==11.3.0
 PyYAML==6.0.2
 fastapi==0.141.1
 uvicorn==0.52.4
+# uvicorn necesita una biblioteca WebSocket para la cámara en directo (/api/live).
+websockets==15.0.1
 httpx==0.28.1

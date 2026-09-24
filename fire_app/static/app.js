@@ -306,7 +306,11 @@ function sendCameraFrame() {
 async function startCamera() {
   try {
     state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-    $("#camera-source").srcObject = state.stream;
+    const cameraVideo = $("#camera-source");
+    cameraVideo.srcObject = state.stream;
+    // El <video> está oculto: sin play() explícito el navegador no lo reproduce
+    // y el canvas capturaría siempre un fotograma vacío.
+    await cameraVideo.play();
     const protocol = location.protocol === "https:" ? "wss" : "ws";
     state.socket = new WebSocket(`${protocol}://${location.host}/api/live?${query()}`);
     state.socket.onmessage = event => {
