@@ -176,9 +176,11 @@ from PIL import Image, UnidentifiedImageError
 from matplotlib.patches import Rectangle
 
 import sys
-PROJECT_ROOT = Path(os.environ.get("TFM_PROJECT_ROOT", "/workspace/TFM"))
-if not PROJECT_ROOT.is_dir():
-    PROJECT_ROOT = Path("C:/Users/elitr/Documents/UPM Data/TFM")
+roots = [Path(os.environ["TFM_PROJECT_ROOT"])] if os.environ.get("TFM_PROJECT_ROOT") else []
+roots += [Path.cwd(), *Path.cwd().parents]
+PROJECT_ROOT = next((p for p in roots if (p / "tfm_pipeline.py").is_file()), None)
+if PROJECT_ROOT is None:
+    raise FileNotFoundError("Abrir el notebook dentro de la carpeta del proyecto o definir TFM_PROJECT_ROOT.")
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -411,9 +413,11 @@ import torch
 from IPython.display import display
 from ultralytics import YOLO
 
-PROJECT_ROOT = Path(os.environ.get("TFM_PROJECT_ROOT", "/workspace/TFM"))
-if not PROJECT_ROOT.is_dir():
-    PROJECT_ROOT = Path("C:/Users/elitr/Documents/UPM Data/TFM")
+roots = [Path(os.environ["TFM_PROJECT_ROOT"])] if os.environ.get("TFM_PROJECT_ROOT") else []
+roots += [Path.cwd(), *Path.cwd().parents]
+PROJECT_ROOT = next((p for p in roots if (p / "tfm_pipeline.py").is_file()), None)
+if PROJECT_ROOT is None:
+    raise FileNotFoundError("Abrir el notebook dentro de la carpeta del proyecto o definir TFM_PROJECT_ROOT.")
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 import tfm_pipeline as pipeline
@@ -753,9 +757,11 @@ import torch
 from IPython.display import Markdown, display, Image as DisplayImage
 from ultralytics import YOLO
 
-PROJECT_ROOT = Path(os.environ.get("TFM_PROJECT_ROOT", "/workspace/TFM"))
-if not PROJECT_ROOT.is_dir():
-    PROJECT_ROOT = Path("C:/Users/elitr/Documents/UPM Data/TFM")
+roots = [Path(os.environ["TFM_PROJECT_ROOT"])] if os.environ.get("TFM_PROJECT_ROOT") else []
+roots += [Path.cwd(), *Path.cwd().parents]
+PROJECT_ROOT = next((p for p in roots if (p / "tfm_pipeline.py").is_file()), None)
+if PROJECT_ROOT is None:
+    raise FileNotFoundError("Abrir el notebook dentro de la carpeta del proyecto o definir TFM_PROJECT_ROOT.")
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 

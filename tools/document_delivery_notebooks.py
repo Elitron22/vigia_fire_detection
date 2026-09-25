@@ -14,13 +14,32 @@ NOTEBOOK_DIR = ROOT / "notebooks"
 GUIDE_TAG = "delivery-guide"
 
 
+RUN_DEFAULT = (
+    "usar el entorno Docker de notebooks (sección 4 del\n"
+    "> `README.md` principal). Volver a ejecutarlo requiere resultados intermedios\n"
+    "> (`artifacts/experiments/` y otras carpetas de `artifacts/`) que no están en el\n"
+    "> repositorio; ver `notebooks/README.md`."
+)
+RUN_WITH_DATASET = (
+    "usar el entorno Docker de notebooks (sección 4 del\n"
+    "> `README.md` principal). Necesita el dataset D-Fire en `data/D-Fire`\n"
+    "> (sección 3 del `README.md` principal)."
+)
+RUN_STANDALONE = (
+    "usar el entorno Docker de notebooks (sección 4 del\n"
+    "> `README.md` principal). Funciona con una copia limpia del repositorio: el\n"
+    "> modelo final está incluido."
+)
+
+
 GUIDES = {
     "01_DFire_preparacion_dataset.ipynb": {
         "role": "Prepara la versión del dataset que usan todos los experimentos: revisa las anotaciones, corrige errores y crea las particiones.",
         "use": "El primero, para ver cómo se prepararon los datos.",
         "mode": "No modifica nada (`RUN_PREPARATION=False`): carga y muestra la versión ya preparada. Necesita el dataset original en `data/D-Fire`.",
         "inputs": "Dataset D-Fire original en `data/D-Fire`.",
-        "outputs": "`artifacts/datasets/dfire_seed42_val10_v1/` (incluida en el repositorio): imágenes de cada partición, correcciones y ficheros `data.yaml`.",
+        "outputs": "`artifacts/datasets/dfire_seed42_val10_v1/` (incluida en el repositorio): listas de imágenes de cada partición, correcciones de anotaciones y ficheros `data.yaml`.",
+        "run": RUN_WITH_DATASET,
         "next": "`02_DFire_entrenamiento_modelos.ipynb`.",
     },
     "02_DFire_entrenamiento_modelos.ipynb": {
@@ -29,12 +48,13 @@ GUIDES = {
         "mode": "No entrena (`RUN_TRAINING=False`). Para entrenar hace falta una GPU.",
         "inputs": "Dataset preparado por el notebook 01 y `configs/model_registry.yaml`.",
         "outputs": "Una carpeta por entrenamiento en `artifacts/experiments/<id>/` con pesos, métricas y configuración.",
+        "run": RUN_WITH_DATASET,
         "next": "`03_DFire_evaluacion_modelos.ipynb`.",
     },
     "03_DFire_evaluacion_modelos.ipynb": {
         "role": "Calcula las métricas de cada modelo entrenado sobre validación y analiza sus errores.",
         "use": "Para ver la comparación inicial de modelos (Tablas 1 y 2 de la memoria).",
-        "mode": "No evalúa (`RUN_STANDARD_EVALUATION=False`, `RUN_ERROR_ANALYSIS=False`): muestra las evaluaciones guardadas.",
+        "mode": "No evalúa (`RUN_STANDARD_EVALUATION=False`, `RUN_ERROR_ANALYSIS=False`): muestra las evaluaciones guardadas del YOLO26s inicial y la comparación de los cuatro modelos.",
         "inputs": "Modelos entrenados en `artifacts/experiments/`.",
         "outputs": "Métricas y análisis de errores dentro de la carpeta de cada experimento.",
         "next": "`05_DFire_barrido_umbrales.ipynb`.",
@@ -62,6 +82,7 @@ GUIDES = {
         "inputs": "Un modelo (por ejemplo, el final: `artifacts/14_final_model_freeze/final/weights/best.pt`) y una imagen o vídeo.",
         "outputs": "`artifacts/07_manual_inference/<id>/` con el resultado anotado y los parámetros usados.",
         "next": "Para usar el sistema completo, la aplicación web (`docker compose up --build`).",
+        "run": RUN_STANDALONE,
     },
     "08_DFire_optimizacion_hiperparametros_YOLO26s.ipynb": {
         "role": "Prueba cuatro cambios de hiperparámetros sobre YOLO26s a 768 px con entrenamientos cortos de 50 épocas.",
@@ -73,11 +94,11 @@ GUIDES = {
     },
     "09_DFire_seleccion_final_validacion.ipynb": {
         "role": "Elige el modelo final y sus umbrales usando solo validación.",
-        "use": "Para ver por qué se eligió YOLO26s a 768 px con umbrales 0,36 (humo) y 0,16 (fuego) (Secciones 4.3 y 4.5 de la memoria).",
+        "use": "Para ver por qué se eligió YOLO26s a 768 px con umbrales 0,36 (humo) y 0,16 (fuego) (Sección 4.5 de la memoria).",
         "mode": "Muestra los resultados guardados (`RUN_SELECTION=False`). No usa test.",
         "inputs": "Predicciones de validación de YOLO26s 768→768 y YOLOv8s 768→640.",
         "outputs": "Resumen de la selección en `artifacts/12_final_validation_selection/`.",
-        "next": "`10_DFire_comparacion_todos_modelos_1pct.ipynb`.",
+        "next": "Congelación del modelo (`tools/freeze_final_model.py`) y `10_DFire_comparacion_todos_modelos_1pct.ipynb`.",
     },
     "10_DFire_comparacion_todos_modelos_1pct.ipynb": {
         "role": "Comprueba la elección aplicando el mismo criterio del 1 % a todas las configuraciones entrenadas.",
@@ -85,7 +106,7 @@ GUIDES = {
         "mode": "Muestra los resultados guardados. Se recalculan con `tools/run_all_models_01pct_comparison.py`.",
         "inputs": "Predicciones de validación de las 14 configuraciones completas y de los cuatro ensayos de hiperparámetros.",
         "outputs": "Rankings y tablas por clase y tamaño.",
-        "next": "Congelación del modelo (`tools/freeze_final_model.py`) y `11_DFire_evaluacion_final_test.ipynb`.",
+        "next": "`11_DFire_evaluacion_final_test.ipynb`.",
     },
     "11_DFire_evaluacion_final_test.ipynb": {
         "role": "Muestra la única evaluación del modelo final sobre test.",
@@ -118,9 +139,7 @@ def guide_markdown(name: str, values: dict[str, str]) -> str:
 | **Salidas principales** | {values['outputs']} |
 | **Continuación** | {values['next']} |
 
-> **Para ejecutarlo:** usar el entorno Docker de notebooks (sección 4 del
-> `README.md` principal). Volver a ejecutarlo requiere los resultados de los
-> notebooks anteriores; ver `notebooks/README.md`.
+> **Para ejecutarlo:** {values.get('run', RUN_DEFAULT)}
 """
 
 

@@ -9,6 +9,9 @@ server:
 
 inference:
   default_experiment_id: yolo26s_final_rpi5
+  # Solo el modelo copiado en model/ (mismos pesos que el modelo congelado).
+  selectable_models:
+    yolo26s_final_rpi5: 768
   device: cpu
   imgsz: 768
   confidence: 0.16

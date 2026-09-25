@@ -13,12 +13,11 @@ data/
 artifacts/runtime_datasets/
 
 # Material auxiliar no necesario para la revisión del repositorio.
-docs/
 results/app_audit/
-$null
 
 # Instalación en Raspberry Pi (ver deployment/README.md)
 .env.telegram
+artifacts/rpi5_*benchmark.json
 .venv-rpi5*/
 /model/
 dist/

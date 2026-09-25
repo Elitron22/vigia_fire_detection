@@ -16,7 +16,7 @@ if [[ "$(uname -m)" != "aarch64" ]]; then
   echo "AVISO: este instalador está preparado para Raspberry Pi OS de 64 bits (aarch64)." >&2
 fi
 if [[ ! -f "${PROJECT_ROOT}/model/yolo26s_768_final.pt" ]]; then
-  echo "Falta model/yolo26s_768_final.pt. Genera y copia primero el bundle." >&2
+  echo "Falta model/yolo26s_768_final.pt. Copiar primero el modelo final (ver deployment/README.md)." >&2
   exit 2
 fi
 

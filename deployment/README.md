@@ -23,7 +23,7 @@ Los dos modelos ya están en el repositorio:
 
 ## Requisitos
 
-- Raspberry Pi 5 con Raspberry Pi OS de 64 bits.
+- Raspberry Pi 5 con Raspberry Pi OS de 64 bits (probado con la versión basada en Debian 13 «Trixie», que trae Python 3.13).
 - Conexión a Internet en la Pi para instalar dependencias.
 - Acceso por SSH desde el PC.
 
@@ -85,7 +85,9 @@ TFM_APP_TRAINED_IMGSZ=768 \
 ```
 
 La aplicación queda en el puerto **8003** de la Pi. En su selector aparecen el
-modelo NCNN y el PyTorch; en la Pi conviene usar el NCNN.
+modelo NCNN, que es el que se usa por defecto, y el PyTorch; en la Pi conviene
+usar el NCNN. Los resultados y el registro de alertas se guardan en
+`artifacts/08_detection_app_ncnn640/`.
 
 ## 3. Instalar la versión PyTorch 768 px (opcional)
 
@@ -101,13 +103,14 @@ bash deployment/rpi5/install.sh --service
 El instalador crea su propio entorno de Python (`.venv-rpi5`), comprueba que el
 modelo es el correcto y, con `--service`, instala el servicio `tfm-fire`. Sin
 `--service`, al terminar muestra el comando para arrancarla a mano. La
-aplicación queda en el puerto **8000** de la Pi.
+aplicación queda en el puerto **8000** de la Pi y guarda sus resultados en
+`artifacts/08_detection_app/`.
 
 ## 4. Abrir la interfaz desde el PC
 
 Por seguridad, la aplicación solo acepta conexiones desde la propia Pi. Para
 abrirla desde el PC se crea un túnel SSH (sustituir `usuario` y
-`raspberrypi.local` por los de tu Pi):
+`raspberrypi.local` por el usuario y el nombre de la Pi):
 
 ```bash
 # Versión NCNN
@@ -122,6 +125,11 @@ Con la sesión abierta, entrar desde el navegador del PC en
 también permite usar la cámara del PC desde la interfaz. No se recomienda
 abrir estos puertos directamente a Internet.
 
+Si el puerto 8000 del PC ya está ocupado (por ejemplo, porque la aplicación de
+Docker está en marcha), se puede usar otro puerto local: con
+`ssh -L 8001:127.0.0.1:8000 usuario@raspberrypi.local` la interfaz queda en
+<http://127.0.0.1:8001>.
+
 ## 5. Avisos por Telegram (opcional)
 
 Los dos servicios leen las credenciales del fichero `.env.telegram`, en la
@@ -135,33 +143,44 @@ TELEGRAM_CHAT_ID=<identificador del chat>
 
 y reiniciar el servicio correspondiente (`sudo systemctl restart tfm-fire-ncnn640`
 o `sudo systemctl restart tfm-fire`). La sección 2 del `README.md` principal
-explica cómo obtener el token y el identificador del chat.
+explica cómo obtener el token y el identificador del chat. Conviene que solo el
+usuario pueda leer el fichero: `chmod 600 .env.telegram`.
+
+Este fichero solo lo leen los servicios. Si la aplicación se arranca a mano,
+hay que cargar antes las variables en la terminal:
+
+```bash
+set -a; . ./.env.telegram; set +a
+```
 
 ## 6. Medir la velocidad en la Pi
 
-Copiar a la Pi una carpeta con algunas imágenes de prueba y ejecutar:
+Copiar a la Pi una carpeta con algunas imágenes de prueba (por ejemplo, del
+dataset D-Fire; las seis usadas en el TFM no están en el repositorio) y
+ejecutar:
 
 ```bash
 # Versión NCNN 640 px
 .venv-rpi5-ncnn/bin/python tools/benchmark_rpi5.py \
   --model model/yolo26s_640_ncnn_model --imgsz 640 \
   --smoke-threshold 0.365 --fire-threshold 0.165 \
-  --images ~/imagenes_benchmark --runs 20
+  --images ~/imagenes_benchmark --runs 20 \
+  --output artifacts/rpi5_ncnn640_benchmark.json
 
 # Versión PyTorch 768 px
 .venv-rpi5/bin/python tools/benchmark_rpi5.py \
   --model model/yolo26s_768_final.pt \
-  --images ~/imagenes_benchmark --runs 20
+  --images ~/imagenes_benchmark --runs 20 \
+  --output artifacts/rpi5_benchmark.json
 ```
 
-El resultado (tiempo medio, mediana, percentil 95, imágenes por segundo,
-temperatura y memoria) se guarda en `artifacts/rpi5_benchmark.json`. Usar
-`--output` para guardar cada medición en un fichero distinto.
+Cada comando guarda su resultado (tiempo medio, mediana, percentil 95, imágenes
+por segundo, temperatura y memoria) en el fichero indicado con `--output`.
 
 ## Resultados obtenidos
 
-Medidos en una Raspberry Pi 5 de 16 GB con Raspberry Pi OS de 64 bits, seis
-imágenes y 20 repeticiones:
+Medidos en una Raspberry Pi 5 con Raspberry Pi OS de 64 bits, seis imágenes y
+20 repeticiones:
 
 | Versión | Resolución | Tiempo por imagen | Imágenes por segundo |
 |---|---:|---:|---:|
@@ -173,7 +192,7 @@ En todas las pruebas la temperatura se mantuvo entre 45,75 y 50,15 °C, el uso
 de memoria por debajo de 600 MB y la Pi no redujo su velocidad por
 calentamiento. Los datos completos están en `results/rpi5/`.
 
-La versión NCNN a 768 px (umbrales 0,415 / 0,165) se probó pero se descartó en
+La versión NCNN a 768 px (umbrales 0,415 / 0,165) se probó, pero se descartó en
 favor de la de 640 px, que tarda un 33 % menos por imagen con métricas muy parecidas.
 Su modelo no se incluye en el repositorio.
 
@@ -191,14 +210,14 @@ rpicam-hello --list-cameras
 La aplicación no lee todavía esta cámara directamente; habría que añadirla
 como fuente nueva.
 
-## Ficheros de esta carpeta y de `deployment/rpi5_ncnn/`
+## Ficheros de `deployment/rpi5/` y `deployment/rpi5_ncnn/`
 
 | Fichero | Para qué sirve |
 |---|---|
 | `deployment/rpi5/install.sh` | Instalador de la versión PyTorch. |
 | `deployment/rpi5/tfm-fire.service.template` | Servicio de la versión PyTorch (puerto 8000). |
 | `deployment/rpi5/requirements.txt` | Dependencias de la versión PyTorch. |
-| `deployment/rpi5/model/yolo26s_640_ncnn_model/` | Modelo NCNN 640 px y sus informes de calibración. |
+| `deployment/rpi5/model/yolo26s_640_ncnn_model/` | Modelo NCNN 640 px y sus informes. `deployment_validation.json` comprueba el modelo con los umbrales de PyTorch (0,36 / 0,16): su estado es `failed` porque supera el 1 % de falsas alarmas, y por eso se recalibraron los umbrales. `deployment_calibration.json` recoge los umbrales recalibrados (0,365 / 0,165), que sí cumplen el límite. |
 | `deployment/rpi5_ncnn/tfm-fire-ncnn640.service.template` | Servicio de la versión NCNN 640 px (puerto 8003). |
 | `deployment/rpi5_ncnn/requirements.txt` | Dependencias de la versión NCNN. |
 | `deployment/rpi5_ncnn/install.sh`, `tfm-fire-ncnn.service.template` | Instalación de la versión NCNN 768 px descartada; no se usan en esta guía. |

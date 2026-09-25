@@ -29,6 +29,20 @@ Por eso hay dos formas de usar los notebooks:
   horas. Si se ejecuta un notebook de análisis sin haber generado antes sus
   datos de entrada, fallará al no encontrarlos en `artifacts/`.
 
+### Qué se puede ejecutar con una copia limpia del repositorio
+
+| Situación | Notebooks que funcionan de principio a fin |
+|---|---|
+| Sin el dataset | 07 (usa el modelo final incluido) |
+| Con el dataset en `data/D-Fire` | 01 y 02 con sus valores por defecto (no entrenan), además del 07 |
+| El resto (03, 05, 06, 08, 09, 10, 11 y 12) | Necesitan resultados intermedios que no están en el repositorio: fallan al cargarlos hasta que se generan con los notebooks anteriores |
+
+Los identificadores de los experimentos que usa cada análisis están fijados en
+`configs/*.yaml`. Al volver a entrenar, el notebook 02 crea identificadores
+nuevos (con la fecha y la hora), así que hay que actualizar esos ficheros de
+configuración antes de ejecutar los análisis posteriores. Los notebooks 11 y 12
+son el cierre del proceso: el 11 no permite repetir la evaluación en test.
+
 ## Entorno
 
 La forma más sencilla de ejecutarlos es el entorno Docker de notebooks, descrito
@@ -52,15 +66,22 @@ docker compose -f compose.notebooks.yaml exec notebook python tools/<script>.py
 
 - Cada notebook empieza con una **Guía de lectura y ejecución**: para qué
   sirve, qué necesita, qué genera y qué notebook va después.
-- Al principio de cada notebook hay unas variables que activan las partes
-  costosas (entrenar, evaluar, calcular). **Todas están desactivadas por
-  defecto**, así que ejecutar el notebook completo no entrena ni recalcula
-  nada: solo muestra los resultados ya guardados en `artifacts/`.
+- En los notebooks que entrenan o calculan algo, al principio hay unas
+  variables que activan las partes costosas (entrenar, evaluar, calcular).
+  **Todas están desactivadas por defecto**, así que ejecutar el notebook
+  completo no entrena ni recalcula nada: solo lee los resultados guardados en
+  `artifacts/` (que deben existir; ver la sección anterior). El 10 y el 11 no
+  tienen estas variables: sus cálculos se lanzan con los scripts de `tools/`
+  indicados en su sección.
 - El conjunto de **test** no se usa hasta el notebook 11. Todas las decisiones
   (modelo, resolución y umbrales) se toman con la partición de validación.
 - Los números siguen el orden en que se hizo el trabajo. No hay notebook 04: era
   un análisis de escenas parecidas que se descartó porque D-Fire no indica de
   qué cámara o vídeo sale cada imagen, y no influyó en el resultado final.
+- Las carpetas de `artifacts/` tienen su propia numeración, que no coincide con
+  la de los notebooks (por ejemplo, el 09 escribe en
+  `artifacts/12_final_validation_selection/`), así que no hay que confundirlas
+  con el notebook 04 que falta.
 
 ## Orden y contenido
 
@@ -69,11 +90,11 @@ docker compose -f compose.notebooks.yaml exec notebook python tools/<script>.py
 | 01 | Prepara el dataset | `RUN_PREPARATION` | 3 |
 | 02 | Entrena los modelos | `RUN_TRAINING` | 4.1 |
 | 03 | Evalúa cada modelo en validación | `RUN_STANDARD_EVALUATION`, `RUN_ERROR_ANALYSIS` | 4.1 |
-| 05 | Barrido de umbrales de confianza | `RUN_SWEEP` | 4.2 |
+| 05 | Barrido de umbrales de confianza | `RUN_SWEEP` | — (análisis de apoyo) |
 | 06 | Comparación de resoluciones | `RUN_COMPARISON` | 4.2 |
-| 07 | (Opcional) Prueba manual con una imagen o vídeo | — | — |
+| 07 | (Opcional) Prueba manual con una imagen o vídeo | `INPUT_PATH` | — |
 | 08 | Ajuste de hiperparámetros de YOLO26s | `RUN_TRAINING`, `RUN_EVALUATION` | 4.4 |
-| 09 | Selección final en validación | `RUN_SELECTION` | 4.3 y 4.5 |
+| 09 | Selección final en validación | `RUN_SELECTION` | 4.5 |
 | 10 | Comprobación con todas las configuraciones | — (script) | 4.5 |
 | 11 | Evaluación final en test | — (script) | 5 |
 | 12 | Interpretabilidad | `RUN_ANALYSIS` | 6 |
@@ -87,8 +108,11 @@ el 10 % del entrenamiento como validación (semilla 42). Resultado: 15.500
 imágenes de entrenamiento, 1.721 de validación y 4.306 de test.
 
 Genera `artifacts/datasets/dfire_seed42_val10_v1/`, que ya está incluida en el
-repositorio. Solo hace falta activar `RUN_PREPARATION=True` para volver a
-crearla.
+repositorio. Incluso con `RUN_PREPARATION=False` necesita el dataset original
+en `data/D-Fire`, porque comprueba las imágenes y muestra ejemplos. Para volver a
+crear la versión preparada hay que activar `RUN_PREPARATION=True` y, como la
+carpeta ya existe, también `ALLOW_REBUILD=True` (o indicar otro
+`DATASET_VERSION`).
 
 ### 02 · Entrenamiento
 
@@ -110,13 +134,16 @@ Los perfiles y modelos están definidos en `configs/model_registry.yaml`.
 
 Calcula las métricas estándar (precisión, recall, mAP) de un experimento y
 analiza sus errores con un umbral de confianza de 0,25. Se elige el experimento
-con `MODEL_KEY` o `EXPERIMENT_ID`. Para evaluar varios experimentos de una vez:
+con `MODEL_KEY` o `EXPERIMENT_ID` (por defecto, el YOLO26s de la comparación
+inicial). Al final reúne todos los modelos evaluados y reproduce las Tablas 1 y
+2 de la memoria. Para evaluar varios experimentos de una vez:
 `tools/run_validation_evaluations.py`.
 
 ### 05 · Barrido de umbrales
 
-Prueba 21 umbrales de confianza en los modelos finalistas y mide, para cada
-uno, el recall y la proporción de imágenes sin humo ni fuego con alarma.
+Prueba 21 umbrales de confianza en tres modelos a 640 px (YOLOv8s, YOLO26s y
+YOLO26n) y mide, para cada uno, el recall y la proporción de imágenes sin humo
+ni fuego con alarma.
 También revisa los errores más habituales. Se ejecuta con `RUN_SWEEP=True` o con:
 
 ```bash
@@ -144,12 +171,12 @@ Configuración: `configs/resolution_comparison.yaml`. Resultados:
 ### 07 · Prueba manual (opcional)
 
 Aplica un modelo a una imagen o vídeo cualquiera y muestra el resultado
-anotado. No interviene en ninguna decisión del TFM. Para usarlo con el modelo
-final incluido en el repositorio, cambiar en la celda de parámetros:
+anotado. No interviene en ninguna decisión del TFM. Por defecto ya usa el
+modelo final incluido en el repositorio (`WEIGHTS_PATH` e `IMGSZ = 768`); solo
+hay que indicar el fichero en la celda de parámetros o subirlo con el botón del
+notebook:
 
 ```python
-WEIGHTS_PATH = "artifacts/14_final_model_freeze/final/weights/best.pt"
-IMGSZ = 768
 INPUT_PATH = "ruta/a/mi_imagen.jpg"
 ```
 
@@ -157,9 +184,10 @@ Los resultados se guardan en `artifacts/07_manual_inference/`.
 
 ### 08 · Ajuste de hiperparámetros de YOLO26s
 
-Prueba cuatro cambios de hiperparámetros (tasa de aprendizaje, weight decay,
-aumento de datos más suave y la combinación de ambos) entrenando 50 épocas cada
-uno, y los compara con las primeras 50 épocas del entrenamiento de referencia.
+Prueba cuatro cambios de hiperparámetros entrenando 50 épocas cada uno: HP01
+(tasa de aprendizaje menor), HP02 (weight decay mayor), HP03 (aumento de datos
+más suave) y HP04 (HP01 y HP03 juntos). Los compara con las primeras 50 épocas
+del entrenamiento de referencia (Tabla 6 de la memoria).
 
 - `RUN_TRAINING=True`: lanza los cuatro entrenamientos (unas 9,4 horas en
   total; si se interrumpe, se puede reanudar).
@@ -185,7 +213,13 @@ python tools/run_final_validation_selection.py
 ```
 
 Cada script tiene su `verify_*.py` correspondiente en `tools/` y su
-configuración en `configs/`.
+configuración en `configs/`. El primero genera la comparación a 768 px de la
+sección 4.3 de la memoria (Tabla 5 y Figura 4); sus resultados no se incluyen
+en el repositorio.
+
+Tras esta selección, el modelo y sus umbrales se congelaron con
+`tools/freeze_final_model.py`, que genera `artifacts/14_final_model_freeze/`
+(incluida en el repositorio).
 
 ### 10 · Comprobación con todas las configuraciones
 
@@ -197,10 +231,6 @@ comprobar que la elección no dependía de haber comparado solo dos candidatos.
 python tools/run_all_models_01pct_comparison.py
 python tools/verify_all_models_01pct_comparison.py
 ```
-
-Tras este paso, el modelo y sus umbrales se congelaron con
-`tools/freeze_final_model.py`, que genera `artifacts/14_final_model_freeze/`
-(incluida en el repositorio).
 
 ### 11 · Evaluación final en test
 
@@ -226,10 +256,14 @@ regiones. Se ejecuta con `RUN_ANALYSIS=True` o con
 
 ## Mantener la documentación de los notebooks
 
-Los notebooks se generaron con los scripts `tools/build_*.py`. Reconstruir un
-notebook con ellos borra sus resultados guardados, así que después hay que
-ejecutarlo de nuevo. La guía de lectura del principio de cada notebook se añade
-o actualiza con:
+La primera versión de los notebooks se generó con los scripts
+`tools/build_*.py`, pero después su texto se revisó a mano. Por eso **no hay que
+volver a ejecutar esos scripts**: sobrescribirían los notebooks entregados, con
+sus explicaciones y sus resultados guardados. Se conservan solo como referencia.
+Tampoco se usan en la memoria los scripts de evaluación con vídeos
+(`tools/*operational_video*`).
+
+La guía de lectura del principio de cada notebook se añade o actualiza con:
 
 ```bash
 python tools/document_delivery_notebooks.py

@@ -6,7 +6,8 @@ server:
   max_upload_mib: 200
 
 inference:
-  default_experiment_id: yolo26s_dfire_seed42_20260912T165304Z
+  # Modelo recomendado en la Pi; el PyTorch 768 se puede elegir en la interfaz.
+  default_experiment_id: yolo26s_640_ncnn_rpi5
   selectable_models:
     yolo26s_640_ncnn_rpi5: 640
     yolo26s_dfire_seed42_20260912T165304Z: 768

@@ -2,7 +2,7 @@
 
 Trabajo Fin de Máster de Elías Ruiz Fernández (Máster en Big Data, Data Science e Inteligencia Artificial, 2026).
 
-Vigía es un sistema de visión por computador que detecta humo y fuego en imágenes, vídeos o cámaras en directo. Usa un modelo de detección de objetos **YOLO26s** entrenado con el dataset público **D-Fire**. Cuando detecta humo o fuego de forma continuada durante unos segundos, genera una alerta y, si se configura, envía un aviso por Telegram con una captura. El proyecto incluye también una versión optimizada para ejecutarse en sistemas de bajos recursos (Raspberry Pi 5).
+Vigía es un sistema de visión por computador que detecta humo y fuego en imágenes, vídeos o cámaras en directo. Usa un modelo de detección de objetos **YOLO26s** entrenado con el dataset público **D-Fire**. Cuando detecta humo o fuego de forma continuada durante unos segundos, genera una alerta y, si se configura, envía un aviso por Telegram con una captura. El proyecto incluye también una versión optimizada para ejecutarse en dispositivos con recursos limitados (Raspberry Pi 5).
 
 A continuación se muestra cómo ejecutar cada parte del proyecto y un resumen de los resultados del modelo.
 
@@ -13,6 +13,7 @@ A continuación se muestra cómo ejecutar cada parte del proyecto y un resumen d
 ## Contenido del repositorio
 
 ```text
+├── Memoria_TFM_Elias_Ruiz_Fernandez.pdf   Memoria del TFM
 ├── fire_app/                Aplicación web Vigía (API, interfaz y alertas)
 ├── notebooks/               Notebooks con todo el proceso: datos, entrenamiento, evaluación
 ├── artifacts/               Modelo final entrenado y ficheros del dataset preparado
@@ -21,11 +22,14 @@ A continuación se muestra cómo ejecutar cada parte del proyecto y un resumen d
 ├── configs/                 Configuración de experimentos y de la aplicación
 ├── tools/                   Scripts usados por los notebooks (evaluación, comparativas, exportación)
 ├── tests/                   Pruebas automáticas
+├── tfm_*.py                 Código común de datos, evaluación y umbrales (lo usan notebooks y tools)
 ├── docker/                  Imagen Docker de los notebooks y dependencias fijadas
 ├── Dockerfile               Imagen Docker de la aplicación
 ├── compose.yaml             Arranque de la aplicación
 ├── compose.notebooks.yaml   Arranque de Jupyter Lab para los notebooks
-└── compose.gpu.yaml         Da acceso a la GPU NVIDIA al entorno de los notebooks
+├── compose.gpu.yaml         Da acceso a la GPU NVIDIA al entorno de los notebooks
+├── requirements-app.txt     Dependencias de la aplicación (sin Docker)
+└── .env.example             Plantilla para activar los avisos por Telegram
 ```
 
 El modelo final entrenado está incluido en `artifacts/14_final_model_freeze/final/weights/best.pt`, así que **no hace falta entrenar nada para usar la aplicación**. Su huella SHA-256 está registrada en `artifacts/14_final_model_freeze/final/freeze_manifest.json` y la aplicación la comprueba antes de cargar el modelo.
@@ -37,7 +41,7 @@ El repositorio tiene dos entornos Docker independientes, cada uno para una cosa:
 | Entorno | Para qué sirve | Necesita GPU | Comando | Dirección |
 |---|---|---|---|---|
 | **Aplicación** | Probar Vigía con el modelo final | No | `docker compose up --build` | <http://127.0.0.1:8000> |
-| **Notebooks** | Preparar el dataset, entrenar y evaluar los modelos | Solo para entrenar | `docker compose -f compose.notebooks.yaml -f compose.gpu.yaml up -d --build` | <http://127.0.0.1:8888/lab> |
+| **Notebooks** | Preparar el dataset, entrenar y evaluar los modelos | Solo para entrenar o evaluar | `docker compose -f compose.notebooks.yaml -f compose.gpu.yaml up -d --build` | <http://127.0.0.1:8888/lab> |
 
 Usan puertos distintos, así que pueden estar en marcha a la vez. La sección 1 explica el de la aplicación y la sección 4 el de los notebooks.
 
@@ -50,7 +54,7 @@ Es la forma más sencilla de probar el proyecto. No necesita GPU ni descargar el
 ### Requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows o macOS) o Docker Engine con Docker Compose v2 (Linux).
-- Un ordenador con procesador x86-64 (Intel o AMD).
+- Un ordenador con procesador x86-64 (Intel o AMD). En Mac, solo se ha probado con procesador Intel.
 - Unos 8 GB de RAM y 6 GB libres en disco.
 
 ### Pasos
@@ -82,14 +86,14 @@ Es la forma más sencilla de probar el proyecto. No necesita GPU ni descargar el
 
 La interfaz tiene tres pestañas:
 
-- **Imagen**: se sube una foto y la aplicación devuelve la imagen con las cajas de humo y fuego detectadas. El resultado se puede descargar.
-- **Vídeo**: se sube un vídeo y se descarga el vídeo anotado. Si el humo o el fuego se mantienen durante unos segundos, se registra una alerta (como máximo un aviso por vídeo).
+- **Imagen**: se sube una foto y la aplicación muestra la imagen con las cajas de humo y fuego detectadas.
+- **Vídeo**: se sube un vídeo y la aplicación muestra el vídeo anotado, que se puede ver y descargar desde el propio reproductor. Si el humo o el fuego se mantienen durante unos segundos, se registra una alerta (como máximo un aviso por vídeo).
 - **Cámara**: usa la cámara del ordenador desde el navegador y analiza la imagen en directo con la misma regla de alerta que el vídeo. El navegador pedirá permiso para usar la cámara.
 
-En el selector de modelo hay dos opciones:
+En «Ajustes avanzados», el selector «Modelo de detección» tiene dos opciones:
 
-- **YOLO26s PyTorch (768 px)**: el modelo final del TFM. Es el que se usa por defecto y el que se ha evaluado en test.
-- **YOLO26s NCNN (640 px)**: una versión más ligera del mismo modelo, pensada para la Raspberry Pi 5.
+- **`yolo26s · 768 px · pytorch · final`**: el modelo final del TFM. Es el que se usa por defecto y el que se ha evaluado en test.
+- **`yolo26s · 640 px · ncnn · final`**: una versión más rápida del mismo modelo, pensada para la Raspberry Pi 5.
 
 Cada modelo usa sus propios umbrales de confianza para decidir cuándo una detección cuenta (humo 0,36 y fuego 0,16 para el modelo PyTorch; humo 0,365 y fuego 0,165 para el NCNN). Estos valores se eligieron en la fase de validación, como se explica en la sección de resultados.
 
@@ -101,13 +105,15 @@ Los resultados y el registro de alertas se guardan en la carpeta `runtime/` del 
 
 Por defecto la aplicación funciona en modo simulación: registra las alertas pero no envía nada. Para recibir avisos reales:
 
-1. Conseguir el token de un bot de Telegram. Sirve cualquier bot que ya tengas; si no tienes ninguno, se crea en un minuto hablando con [@BotFather](https://t.me/BotFather), que te da el token al terminar.
-2. Obtener el identificador del chat donde quieres recibir los avisos. Para ello, envía un mensaje cualquiera al bot (por ejemplo `/start`) y abre en el navegador `https://api.telegram.org/bot<token>/getUpdates`: el número que aparece en `"chat":{"id": ...}` es el identificador.
+1. Conseguir el token de un bot de Telegram. Sirve cualquier bot ya creado; si no se tiene ninguno, se crea en un minuto hablando con [@BotFather](https://t.me/BotFather), que da el token al terminar.
+2. Obtener el identificador del chat donde se quieren recibir los avisos. Para ello, enviar un mensaje cualquiera al bot (por ejemplo `/start`) y abrir en el navegador `https://api.telegram.org/bot<token>/getUpdates`: el número que aparece en `"chat":{"id": ...}` es el identificador.
 3. Copiar el fichero de ejemplo y rellenarlo:
 
    ```bash
    cp .env.example .env
    ```
+
+   En el símbolo del sistema de Windows (cmd), el comando es `copy .env.example .env`.
 
    ```text
    TFM_TELEGRAM_MODE=live
@@ -115,7 +121,7 @@ Por defecto la aplicación funciona en modo simulación: registra las alertas pe
    TELEGRAM_CHAT_ID=<identificador del chat>
    ```
 
-4. Volver a arrancar con `docker compose up --build`. El botón «Probar Telegram» de la interfaz envía un mensaje de prueba para comprobar que todo está bien configurado.
+4. Volver a arrancar con `docker compose up --build`. En la interfaz, el botón «Enviar mensaje de prueba» (dentro de «Diagnóstico del sistema») envía un mensaje para comprobar que todo está bien configurado.
 
 Cada aviso incluye la clase detectada (humo o fuego), la confianza, el momento y una captura con las detecciones. El fichero `.env` no se sube al repositorio.
 
@@ -149,7 +155,9 @@ El notebook 01 lee estas carpetas sin modificarlas y crea la versión preparada 
 
 ## 4. Reproducir los experimentos con los notebooks
 
-Los notebooks contienen todo el proceso del TFM. Están guardados con sus resultados, así que **se pueden leer directamente en GitHub o en Jupyter sin ejecutar nada**. Por defecto, las partes costosas (entrenar o evaluar) están desactivadas y solo se activan cambiando una variable al principio de cada notebook (por ejemplo `RUN_TRAINING=True`).
+Los notebooks contienen todo el proceso del TFM. Están guardados con sus resultados, así que **se pueden leer directamente en GitHub o en Jupyter sin ejecutar nada**. Por defecto, las partes costosas (entrenar o evaluar) están desactivadas; en los notebooks que las tienen, se activan cambiando una variable al principio (por ejemplo `RUN_TRAINING=True`).
+
+Para volver a ejecutarlos, hay que tener en cuenta que los resultados intermedios (modelos entrenados en `artifacts/experiments/` y otras carpetas de `artifacts/`) no están en el repositorio por su tamaño. Con una copia limpia se pueden ejecutar el 07 (con el modelo final incluido) y el 01 y el 02 (con el dataset); el resto necesita repetir antes los pasos anteriores. `notebooks/README.md` lo detalla.
 
 Para ejecutarlos hay un entorno Docker propio, distinto del de la aplicación: incluye PyTorch 2.12.1 con CUDA 13.0, Ultralytics, Jupyter Lab y el resto de dependencias con las versiones exactas usadas en el TFM. Es el mismo entorno con el que se entrenaron los modelos.
 
@@ -161,7 +169,8 @@ Para ejecutarlos hay un entorno Docker propio, distinto del de la aplicación: i
 - Para entrenar o evaluar modelos, además:
   - Una GPU NVIDIA. Los modelos del TFM se entrenaron con una RTX 5070 de 12 GB.
   - Un controlador NVIDIA compatible con CUDA 13.0 (versión 580.88 o superior en Windows, 580.65.06 o superior en Linux).
-  - Docker con acceso a la GPU (en Windows, Docker Desktop con WSL 2 lo configura automáticamente).
+  - Docker con acceso a la GPU. En Windows, Docker Desktop con WSL 2 lo configura automáticamente. En Linux hay que instalar [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) y reiniciar Docker.
+  - Docker Compose 2.30 o posterior, porque `compose.gpu.yaml` usa el atributo `gpus` (cualquier Docker Desktop reciente lo incluye).
 
 ### Pasos
 
@@ -221,11 +230,12 @@ No hay notebook 04: era un análisis que se descartó y no influyó en el result
 
 También se puede montar el entorno a mano con Python 3.12:
 
-1. Instalar PyTorch 2.12.1 y torchvision 0.27.1 con soporte CUDA siguiendo <https://pytorch.org/get-started/locally/>.
-2. Instalar el resto de dependencias: `pip install -r docker/requirements.txt`.
-3. Abrir Jupyter desde la raíz del repositorio: `jupyter lab`.
+1. Crear y activar un entorno virtual desde la raíz del repositorio: `python -m venv .venv` y, después, `.venv\Scripts\activate` en Windows o `source .venv/bin/activate` en Linux y macOS.
+2. Instalar PyTorch 2.12.1 y torchvision 0.27.1 con soporte CUDA siguiendo <https://pytorch.org/get-started/locally/>.
+3. Instalar el resto de dependencias: `pip install -r docker/requirements.txt`.
+4. Abrir Jupyter desde la raíz del repositorio: `jupyter lab`.
 
-Los notebooks encuentran automáticamente la carpeta del proyecto. Si se quiere usar otra ubicación, se puede indicar con la variable de entorno `TFM_PROJECT_ROOT`.
+Los notebooks encuentran automáticamente la carpeta del proyecto si se abren desde dentro del repositorio. Si no, se puede indicar con la variable de entorno `TFM_PROJECT_ROOT`. Si el dataset no está en `data/D-Fire`, su ubicación se indica con `TFM_DATASET_ROOT`.
 
 ---
 
@@ -237,7 +247,7 @@ Se entrenaron cuatro modelos (YOLOv8n, YOLOv8s, YOLO26n y YOLO26s) y se probaron
 
 El criterio fue detectar el mayor número posible de incendios (**recall**) sin superar un 1 % de imágenes sin humo ni fuego en las que salte una alarma. En un sistema de aviso temprano es peor no detectar un incendio real que dar una falsa alarma, pero demasiadas falsas alarmas harían el sistema inútil.
 
-El modelo elegido fue **YOLO26s entrenado y evaluado a 768 píxeles**, con un umbral de confianza de **0,36 para humo** y **0,16 para fuego**. Una detección solo se tiene en cuenta si su confianza supera el umbral de su clase.
+El modelo elegido fue **YOLO26s entrenado y evaluado a 768 píxeles**, con un umbral de confianza de **0,36 para humo** y **0,16 para fuego**. Una detección solo se tiene en cuenta si su confianza alcanza o supera el umbral de su clase.
 
 ### Resultados en test
 
@@ -250,6 +260,8 @@ Sobre las 4.306 imágenes de test:
 | F1 | 72,29 % | 81,85 % | 65,81 % |
 | mAP50 | 79,27 % | 85,67 % | 72,86 % |
 | mAP50-95 | 46,38 % | 53,65 % | 39,10 % |
+
+En la columna «Global», la precisión, el recall y el F1 se calculan juntando las detecciones de las dos clases; el mAP50 y el mAP50-95 son la media de humo y fuego.
 
 - **Precisión**: de todo lo que el modelo marca como humo o fuego, qué parte es correcta.
 - **Recall**: de todo el humo y fuego que hay realmente en las imágenes, qué parte encuentra el modelo.
@@ -285,10 +297,15 @@ El modelo PyTorch original es demasiado lento para la Raspberry Pi. Convertido a
 
 ## Más documentación
 
+- [Memoria del TFM](Memoria_TFM_Elias_Ruiz_Fernandez.pdf).
 - `notebooks/README.md`: explicación detallada de cada notebook.
-- `fire_app/README.md`: funcionamiento interno de la aplicación, regla de alertas y API.
+- `fire_app/README.md`: funcionamiento interno de la aplicación, regla de alertas, API y cómo lanzar sus pruebas automáticas.
 - `deployment/README.md`: instalación en Raspberry Pi 5.
 
 ## Autor
 
 Elías Ruiz Fernández, 2026.
+
+## Vídeo de presentación
+
+Presentación del proyecto en vídeo: <https://youtu.be/P9GD5GUJ5vE>

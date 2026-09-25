@@ -65,9 +65,9 @@ full_sensitivity = ranked[
 winner = full_sensitivity.iloc[0]
 previous = full_sensitivity[full_sensitivity.configuration == "yolo26s_768_eval768"].iloc[0]
 display(Markdown(
-    f"**Resultado estricto del criterio vigente:** {winner.label}, con recall macro "
+    f"**Mejor recall medio con el criterio del 1 %:** {winner.label}, con recall macro "
     f"**{winner.macro_recall:.2%}** y F1 **{winner.micro_f1:.2%}**.  \\n"
-    f"**Candidato anterior:** {previous.label}, recall macro **{previous.macro_recall:.2%}**, "
+    f"**Modelo final (elegido en el notebook 09):** {previous.label}, recall macro **{previous.macro_recall:.2%}**, "
     f"F1 **{previous.micro_f1:.2%}** y recall de fuego **{previous.fire_recall:.2%}**."
 ))
 '''),
@@ -222,12 +222,12 @@ cribado de hiperparámetros y no un entrenamiento final equivalente.
 """),
         md("## Takeaways"),
         code('''display(Markdown(
-    "1. **Aplicación literal del criterio actual:** YOLO26s 640→640 gana por recall macro.  \\n"
+    "1. **Aplicación literal del criterio:** YOLO26s 640→640 gana por recall macro.  \\n"
     "2. **Mejor equilibrio entre clases y mejor fuego:** YOLO26s 768→768 mantiene mayor "
     "recall de fuego, peor-clase, precisión y F1.  \\n"
     "3. **Máximo F1:** YOLOv8s 768→640, empatado en la práctica con YOLO26s 768→768.  \\n"
-    "4. **Decisión pendiente:** aclarar si la prioridad formal debe ser recall macro o "
-    "recall mínimo/de fuego antes de congelar el candidato para test."
+    "4. **Decisión:** se mantiene YOLO26s 768→768 con umbrales 0,36/0,16, el modelo "
+    "elegido en el notebook 09, por su mejor equilibrio entre clases y su mayor recall de fuego."
 ))
 '''),
     ]

@@ -43,19 +43,21 @@ resultados en la carpeta `runtime/` del repositorio:
 
 ### Sin Docker (opcional)
 
-Con Python 3.12, PyTorch y torchvision instalados
-(<https://pytorch.org/get-started/locally/>):
+Con Python 3.12, desde la raíz del repositorio y preferiblemente dentro de un
+entorno virtual (`python -m venv .venv`), instalar PyTorch y torchvision
+(<https://pytorch.org/get-started/locally/>) y después:
 
 ```bash
 pip install -r requirements-app.txt
-python tools/run_detection_app.py
+python tools/run_detection_app.py --host 127.0.0.1
 ```
 
 Sin indicar nada, usa el perfil `configs/app.yaml`: carga el modelo PyTorch
-final, permite cambiar desde la interfaz la confianza, el IoU y la resolución, y
-guarda los resultados en `artifacts/08_detection_app/`. Por defecto se ejecuta
-en CPU; si PyTorch tiene soporte CUDA, se puede usar la GPU definiendo
-`TFM_APP_DEVICE=0`.
+final y guarda los resultados en `artifacts/08_detection_app/`. Este perfil
+escucha en `0.0.0.0` (todas las interfaces de red); con `--host 127.0.0.1` la
+aplicación solo es accesible desde el propio ordenador. El puerto se cambia con
+`--port`. Por defecto se ejecuta en CPU; si PyTorch tiene soporte CUDA, se puede
+usar la GPU definiendo `TFM_APP_DEVICE=0`.
 
 ## Perfiles de configuración
 
@@ -64,25 +66,40 @@ El perfil se elige con la variable de entorno `TFM_APP_CONFIG`.
 | Perfil | Dónde se usa | Modelos disponibles |
 |---|---|---|
 | `configs/app.release.yaml` | Docker (`compose.yaml`) | PyTorch 768 px y NCNN 640 px |
-| `configs/app.yaml` | Ejecución local sin Docker | Modelo PyTorch final (parámetros ajustables) |
-| `configs/app.rpi5.ncnn640.yaml` | Raspberry Pi, versión recomendada | NCNN 640 px y PyTorch 768 px |
+| `configs/app.yaml` | Ejecución local sin Docker | Modelo PyTorch final (parámetros ajustables por API) |
+| `configs/app.rpi5.ncnn640.yaml` | Raspberry Pi, versión recomendada | NCNN 640 px (por defecto) y PyTorch 768 px |
 | `configs/app.rpi5.yaml` | Raspberry Pi, versión PyTorch | PyTorch 768 px |
 | `configs/app.rpi5.ncnn.yaml` | Versión NCNN 768 px descartada | NCNN 768 px (su modelo no está en el repositorio) |
 
-En los perfiles de Docker y de Raspberry Pi la resolución, el IoU y la
-confianza mínima quedan fijados a los del TFM y no se pueden cambiar desde la
-interfaz.
+En la interfaz se pueden mover los umbrales de humo y fuego y el tiempo mínimo
+para alertar. La resolución, el IoU y la confianza mínima de inferencia no
+aparecen en la interfaz: con `configs/app.yaml` se pueden cambiar por API (con
+los parámetros `imgsz`, `nms_iou` y `confidence`), y en los perfiles de Docker
+y de Raspberry Pi quedan fijados a los del TFM.
 
 ## Modelos y umbrales
 
 El modelo PyTorch final se carga desde
 `artifacts/14_final_model_freeze/final/`. Antes de cargarlo, la aplicación
-comprueba que su SHA-256 coincide con el de `freeze_manifest.json`. Otros
-modelos, como la versión NCNN, se indican con la variable `TFM_APP_MODEL_PATH`
-(Docker lo hace automáticamente).
+comprueba que su SHA-256 coincide con el de `freeze_manifest.json`.
+
+Se puede añadir un segundo modelo, como la versión NCNN, con estas variables de
+entorno (Docker y los servicios de la Raspberry Pi ya las definen):
+
+| Variable | Contenido | Valor por defecto |
+|---|---|---|
+| `TFM_APP_MODEL_PATH` | Ruta al modelo (fichero `.pt` o carpeta NCNN) | — |
+| `TFM_APP_MODEL_ID` | Identificador del modelo; debe coincidir con el del perfil (por ejemplo `yolo26s_640_ncnn_rpi5` para el NCNN 640) | `yolo26s_final_rpi5` |
+| `TFM_APP_TRAINED_IMGSZ` | Resolución con la que se entrenó | `768` |
+| `TFM_APP_MODEL_KEY` | Arquitectura | `yolo26s` |
+| `TFM_APP_MODEL_SHA256` | Huella SHA-256 que debe tener el fichero (opcional) | — |
+
+Por ejemplo, para usar el NCNN 640 con el perfil de Docker hay que definir las
+mismas variables que `compose.yaml`.
 
 Cada modelo tiene sus propios umbrales de confianza por clase: una detección
-solo se muestra y cuenta para las alertas si supera el umbral de su clase.
+solo se muestra y cuenta para las alertas si alcanza o supera el umbral de su
+clase.
 
 | Modelo | Humo | Fuego | Origen |
 |---|---:|---:|---|
@@ -90,16 +107,16 @@ solo se muestra y cuenta para las alertas si supera el umbral de su clase.
 | YOLO26s NCNN 640 px | 0,365 | 0,165 | Recalculados en validación, porque la conversión a NCNN cambia ligeramente las confianzas |
 
 La interfaz carga los umbrales del modelo seleccionado. Se pueden mover con los
-controles deslizantes para hacer pruebas (el botón de restablecer los devuelve
-a su valor), pero con otros valores los resultados ya no corresponden a las
-métricas del TFM.
+controles deslizantes de «Ajustes avanzados» para hacer pruebas (el botón
+«Restaurar valores recomendados» los devuelve a su valor), pero con otros
+valores los resultados ya no corresponden a las métricas del TFM.
 
 ## Alertas
 
 Para que una alerta no salte por un único fotograma, la regla se aplica por
 separado para humo y para fuego:
 
-1. La confianza de la detección debe superar el umbral de su clase.
+1. La confianza de la detección debe alcanzar o superar el umbral de su clase.
 2. La detección debe mantenerse durante `hold_seconds` (3 s por defecto, ajustable en la interfaz).
 3. Si desaparece más de `maximum_gap_seconds` (0,75 s), la cuenta vuelve a empezar.
 4. Tras `clear_seconds` (5 s) sin detecciones, la alerta se cierra.
@@ -136,9 +153,9 @@ TELEGRAM_CHAT_ID=<identificador del chat>
   proyecto, que los servicios de systemd leen al arrancar (ver
   `deployment/README.md`).
 
-Los dos ficheros están excluidos de Git. El botón «Probar Telegram» de la
-interfaz se activa cuando el modo es `live` y hay credenciales, y envía un
-mensaje de prueba.
+Los dos ficheros están excluidos de Git. El botón «Enviar mensaje de prueba»
+(en «Diagnóstico del sistema») se activa cuando el modo es `live` y hay
+credenciales, y envía un mensaje de prueba.
 
 Cada aviso incluye la clase (humo o fuego), la confianza máxima, el instante,
 el origen y una captura anotada. Si hay humo y fuego a la vez se envía un solo
@@ -161,7 +178,10 @@ La documentación interactiva está en <http://127.0.0.1:8000/docs>.
 | `WS /api/live` | Recibe fotogramas de la cámara y responde con detecciones y estado de las alertas |
 
 Las rutas de análisis reciben el fichero directamente como cuerpo de la
-petición y su nombre en la cabecera `X-Filename`. La respuesta de vídeo incluye
+petición y su nombre en la cabecera `X-Filename`. Admiten los parámetros de
+consulta `experiment_id`, `smoke_threshold` y `fire_threshold` (y, en vídeo,
+`hold_seconds`), además de `confidence`, `nms_iou` e `imgsz` cuando el perfil lo
+permite. El tamaño máximo de subida lo fija `max_upload_mib` en el perfil. La respuesta de vídeo incluye
 además las cabeceras `X-TFM-Run-Id`, `X-TFM-Event-Count`,
 `X-TFM-Detection-Summary` (detecciones y confianza máxima por clase) y
 `X-TFM-Processing-Ms-Per-Frame`.
@@ -181,7 +201,8 @@ avisos de Telegram y las rutas de la API.
 `tests/smoke_fire_app_end_to_end.py` es una prueba adicional que sí carga el
 modelo final y analiza una imagen real, un vídeo generado a partir de ella y
 el WebSocket de la cámara. Se ejecuta sin Docker, con el entorno de la sección
-"Sin Docker" e indicando una imagen:
+"Sin Docker" e indicando una imagen en la que se vea humo o fuego (por ejemplo,
+una del dataset D-Fire), porque la prueba comprueba que salta una alerta:
 
 ```bash
 python tests/smoke_fire_app_end_to_end.py --image ruta/a/una/imagen.jpg

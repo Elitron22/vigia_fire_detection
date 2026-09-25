@@ -32,6 +32,9 @@ class HyperparameterEvaluationTests(unittest.TestCase):
 
     def test_training_summary_uses_first_50_baseline_epochs(self):
         config = load_config(DEFAULT_CONFIG)
+        experiments = pipeline.experiments_root(DEFAULT_CONFIG.parents[1])
+        if not (experiments / config["baseline_experiment_id"] / "experiment.json").exists():
+            self.skipTest("Requiere artifacts/experiments/, que no se incluye en el repositorio.")
         baseline = pipeline.resolve_experiment(
             experiment_id=config["baseline_experiment_id"], root=DEFAULT_CONFIG.parents[1]
         )

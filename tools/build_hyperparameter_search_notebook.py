@@ -94,9 +94,11 @@ import yaml
 from IPython.display import display, Markdown
 from ultralytics import YOLO
 
-PROJECT_ROOT = Path(os.environ.get("TFM_PROJECT_ROOT", "/workspace/TFM"))
-if not PROJECT_ROOT.is_dir():
-    PROJECT_ROOT = Path("C:/Users/elitr/Documents/UPM Data/TFM")
+roots = [Path(os.environ["TFM_PROJECT_ROOT"])] if os.environ.get("TFM_PROJECT_ROOT") else []
+roots += [Path.cwd(), *Path.cwd().parents]
+PROJECT_ROOT = next((p for p in roots if (p / "tfm_pipeline.py").is_file()), None)
+if PROJECT_ROOT is None:
+    raise FileNotFoundError("Abrir el notebook dentro de la carpeta del proyecto o definir TFM_PROJECT_ROOT.")
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 import tfm_pipeline as pipeline
@@ -348,9 +350,10 @@ def training_summary(experiment, horizon_epochs):
         raise KeyError(f"Falta la métrica {metric!r} en {results_path}.")
     best_index = results[metric].astype(float).idxmax()
     best = results.loc[best_index]
+    trial_id = experiment.get("trial_id")
     return {
         "experiment_id": experiment["experiment_id"],
-        "trial_id": experiment.get("trial_id", "baseline"),
+        "trial_id": trial_id if isinstance(trial_id, str) else "baseline",
         "estado": experiment["status"],
         "horizonte_comparado": len(results),
         "mejor_época": int(best["epoch"]),
@@ -399,7 +402,13 @@ if len(summary_table) > 1:
     for container in ax.containers:
         ax.bar_label(container, fmt="%.4f", padding=3)
     plt.tight_layout()
-    plt.show()
+    # Se muestra como PNG para que funcione también con MPLBACKEND=Agg (Docker).
+    import io
+    from IPython.display import Image as DisplayImage
+    buffer = io.BytesIO()
+    ax.figure.savefig(buffer, format="png", dpi=110)
+    plt.close(ax.figure)
+    display(DisplayImage(buffer.getvalue()))
 '''
         ),
         markdown("## 7. Evaluación automática del cribado"),

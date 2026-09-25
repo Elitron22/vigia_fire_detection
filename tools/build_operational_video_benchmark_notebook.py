@@ -53,9 +53,11 @@ import pandas as pd
 import yaml
 from IPython.display import display, Markdown, Image
 
-PROJECT_ROOT = Path(os.environ.get("TFM_PROJECT_ROOT", "/workspace/TFM"))
-if not PROJECT_ROOT.is_dir():
-    PROJECT_ROOT = Path("C:/Users/elitr/Documents/UPM Data/TFM")
+roots = [Path(os.environ["TFM_PROJECT_ROOT"])] if os.environ.get("TFM_PROJECT_ROOT") else []
+roots += [Path.cwd(), *Path.cwd().parents]
+PROJECT_ROOT = next((p for p in roots if (p / "tfm_pipeline.py").is_file()), None)
+if PROJECT_ROOT is None:
+    raise FileNotFoundError("Abrir el notebook dentro de la carpeta del proyecto o definir TFM_PROJECT_ROOT.")
 PROJECT_ROOT = PROJECT_ROOT.resolve()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
